@@ -28,6 +28,9 @@ body{padding-bottom:96px}
     radial-gradient(120% 60% at 50% 100%, #5b4a6e 0 45%, transparent 46%),
     linear-gradient(160deg,#6b7f8f,#3a4652 55%,#2a2f36);
   transition:filter .25s}
+.real .scene{background:var(--frame) center/cover no-repeat}
+.real #grade .scene{animation:kb 9s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08) translateY(-1.5%)}}
 .scene::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0006)}
 .grade,.fl{position:absolute;inset:0;transition:filter .25s,opacity .25s}
 .tint,.vig{position:absolute;inset:0;pointer-events:none}
@@ -225,12 +228,18 @@ function readHash(){
     while (b.length % 4) b += "=";
     if (b) hook = decodeURIComponent(escape(atob(b)));
   }catch(e){}
-  return {s, hook, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.3")};
+  let frame = (h.get("f") || "").replace(/-/g, "+").replace(/_/g, "/");
+  while (frame && frame.length % 4) frame += "=";
+  return {s, hook, frame, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.3")};
 }
 const init = readHash();
 const st = Object.assign({}, DEF, init.s);
 let speed = init.speed;
 let hook = init.hook || "";
+if (init.frame){                  // кадр из видео клиента вместо нарисованного силуэта
+  document.documentElement.style.setProperty("--frame", `url("data:image/jpeg;base64,${init.frame}")`);
+  document.body.classList.add("real");
+}
 if (!FILTERS[st.filter]) st.filter = "none";
 const $ = id => document.getElementById(id);
 const hex = () => ACCENTS[st.accent] || (String(st.accent).startsWith("#") ? st.accent : "#FFF0B8");
