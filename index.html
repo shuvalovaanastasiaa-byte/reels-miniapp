@@ -29,6 +29,19 @@ body{padding-bottom:96px}
     linear-gradient(160deg,#6b7f8f,#3a4652 55%,#2a2f36);
   transition:filter .25s}
 .scene::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0006)}
+.grade,.fl{position:absolute;inset:0;transition:filter .25s,opacity .25s}
+.tint,.vig{position:absolute;inset:0;pointer-events:none}
+.vig{background:radial-gradient(75% 60% at 50% 50%,transparent 45%,#000 120%)}
+.flts{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px 4px;scrollbar-width:none}
+.flts::-webkit-scrollbar{display:none}
+.ft{flex:none;width:64px;border:0;background:none;padding:0;color:var(--muted);font:600 11.5px Montserrat;text-align:center}
+.ft .th{position:relative;width:64px;height:84px;border-radius:12px;overflow:hidden;margin-bottom:5px;border:2px solid transparent}
+.ft.on{color:var(--text)}
+.ft.on .th{border-color:#fff}
+.ft .th .scene::after{display:none}
+.txt{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--chip);color:var(--text);
+  font:600 14px Montserrat;padding:11px 12px;border-radius:12px;outline:none}
+.txt:focus{border-color:var(--accent)}
 .lbl{position:absolute;left:0;right:0;text-align:center;line-height:1.08;pointer-events:none}
 .title{font-weight:700;padding:0 6%}
 .title.fill span{background:var(--accent);color:#151515;padding:.04em .28em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
@@ -91,7 +104,8 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px}
 
 <div class="stage">
   <div class="phone" id="phone">
-    <div class="scene" id="scene"></div>
+    <div class="grade" id="grade"><div class="scene"></div>
+      <div class="fl" id="fl"><div class="scene"></div><div class="tint" id="tint"></div><div class="vig" id="vig"></div></div></div>
     <div class="ins" id="ins"><div class="card"></div></div>
     <div class="lbl title" id="title"><span></span></div>
     <div class="lbl subs" id="subs"></div>
@@ -121,6 +135,8 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px}
   <section>
     <h2>Заголовок <button class="switch" id="title_sw" aria-label="Заголовок"></button></h2>
     <div id="titleOpts">
+      <div class="row" style="margin-top:0"><label>Свой текст заголовка</label>
+        <input class="txt" id="hook" maxlength="90" placeholder="Пусто — придумаю сам по твоей речи"></div>
       <div class="row"><label>Буквы</label><div class="chips" id="title_case"></div></div>
       <div class="row"><label>Шрифт</label><div class="chips" id="title_font"></div></div>
       <div class="tog">Печатать по буквам<button class="switch" data-k="title_typing"></button></div>
@@ -136,6 +152,12 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px}
     <div class="row" style="margin-top:0"><label>Как появляются</label><div class="chips" id="insert_anim"></div></div>
     <div class="row"><label>Где показывать</label><div class="chips" id="insert_pos"></div></div>
     <p class="hint">Это настройка по умолчанию — для каждого фото её можно поменять кнопками, когда пришлёшь файл.</p>
+  </section>
+
+  <section>
+    <h2>Фильтр</h2>
+    <div class="flts" id="filters"></div>
+    <div class="row" id="fstrRow"><label>Сила фильтра <span id="v_filter_strength"></span></label><input type="range" id="filter_strength" min="0.2" max="1" step="0.05"></div>
   </section>
 
   <section>
@@ -170,9 +192,23 @@ const POS = {top:"Сверху",center:"По центру",bottom:"Снизу",l
 const FONTS = {Montserrat:"Montserrat",Oswald:"Oswald"};
 const TFONTS = {Montserrat:"Montserrat",Oswald:"Oswald",Caveat:"Рукописный"};
 const CASES = {lower:"строчные",upper:"ЗАГЛАВНЫЕ",as_is:"Как в речи"};
+// фильтры: те же, что в монтаже (style.py FILTERS); здесь — их приближение для превью
+const FILTERS = {
+  none:   {n:"Без фильтра", css:""},
+  warm:   {n:"Тёплый",  css:"sepia(.22) saturate(1.15)", tint:["#ff9a3c","soft-light",.35]},
+  cold:   {n:"Холодный",css:"saturate(.92)", tint:["#3c8cff","soft-light",.45]},
+  peach:  {n:"Персик",  css:"brightness(1.04) saturate(1.05)", tint:["#ff9f87","soft-light",.5]},
+  vivid:  {n:"Сочный",  css:"saturate(1.45) contrast(1.06)"},
+  soft:   {n:"Мягкий",  css:"contrast(.88) brightness(1.06) saturate(.86)"},
+  matte:  {n:"Матовый", css:"contrast(.82) brightness(1.05) saturate(.9)"},
+  cinema: {n:"Кино",    css:"contrast(1.1) saturate(1.1)", tint:["#008a8a","soft-light",.35]},
+  film:   {n:"Плёнка",  css:"contrast(.9) saturate(.78) sepia(.12)", tint:["#2f6f6a","soft-light",.25], vig:.45},
+  vintage:{n:"Винтаж",  css:"sepia(.45) contrast(.9) saturate(.85)", vig:.5},
+  noir:   {n:"Нуар",    css:"grayscale(1) contrast(1.3) brightness(.96)", vig:.55},
+};
 const DEF = {sub_mode:"dynamic",accent:"кремовый",sub_font:"Montserrat",sub_scale:1,sub_y:.74,title:true,title_case:"lower",
   title_font:"Montserrat",title_fill:false,title_typing:true,title_y:.17,title_scale:1,title_hold:6,cards:true,insert_anim:"pop",
-  insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,bw:false,retouch:false,zooms:true,sfx:true,music:true,denoise:false,volume_db:0};
+  insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,bw:false,filter:"none",filter_strength:1,retouch:false,zooms:true,sfx:true,music:true,denoise:false,volume_db:0};
 
 // настройки приходят от бота в адресе: #s=<base64 json>&ctx=new|edit
 function readHash(){
@@ -183,11 +219,19 @@ function readHash(){
     while (b.length % 4) b += "=";
     s = JSON.parse(decodeURIComponent(escape(atob(b))));
   }catch(e){}
-  return {s, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.3")};
+  let hook = "";
+  try{
+    let b = (h.get("h") || "").replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    if (b) hook = decodeURIComponent(escape(atob(b)));
+  }catch(e){}
+  return {s, hook, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.3")};
 }
 const init = readHash();
 const st = Object.assign({}, DEF, init.s);
 let speed = init.speed;
+let hook = init.hook || "";
+if (!FILTERS[st.filter]) st.filter = "none";
 const $ = id => document.getElementById(id);
 const hex = () => ACCENTS[st.accent] || (String(st.accent).startsWith("#") ? st.accent : "#FFF0B8");
 const haptic = () => { try{ tg && tg.HapticFeedback.selectionChanged(); }catch(e){} };
@@ -201,6 +245,29 @@ function chips(id, opts, key, cb){
     b.onclick = () => { st[key] = v; haptic(); chips(id, opts, key, cb); render(); cb && cb(); };
     box.appendChild(b);
   }
+}
+function applyFilter(layer, key, k){
+  const F = FILTERS[key] || FILTERS.none;
+  layer.style.filter = F.css || "none";
+  layer.style.opacity = key === "none" ? 0 : k;
+  const t = layer.querySelector(".tint"), v = layer.querySelector(".vig");
+  if (t){ if (F.tint){ t.style.background = F.tint[0]; t.style.mixBlendMode = F.tint[1]; t.style.opacity = F.tint[2]; }
+          else t.style.opacity = 0; }
+  if (v) v.style.opacity = F.vig || 0;
+}
+function filters(){
+  const box = $("filters"); box.innerHTML = "";
+  for (const [key, F] of Object.entries(FILTERS)){
+    const b = document.createElement("button");
+    b.className = "ft" + (st.filter === key ? " on" : "");
+    b.innerHTML = '<div class="th"><div class="scene"></div><div class="fl"><div class="scene"></div><div class="tint"></div><div class="vig"></div></div></div>' + F.n;
+    applyFilter(b.querySelector(".fl"), key, 1);
+    b.onclick = () => { st.filter = key; haptic(); filters(); render(); };
+    box.appendChild(b);
+  }
+  $("fstrRow").style.display = st.filter === "none" ? "none" : "";
+  const on = box.querySelector(".on");
+  if (on && on.scrollIntoViewIfNeeded) on.scrollIntoViewIfNeeded();
 }
 function swatches(){
   const box = $("accent"); box.innerHTML = "";
@@ -221,6 +288,7 @@ const FMT = {
   sub_y: v => Math.round(v*100) + "%", title_y: v => Math.round(v*100) + "%",
   title_hold: v => v + " с", brightness: v => (v>0?"+":"") + Math.round(v*500) + "%",
   warmth: v => (v>0?"+":"") + Math.round(v*1250) + "%", contrast: v => Math.round(v*100) + "%",
+  filter_strength: v => Math.round(v*100) + "%",
   volume_db: v => (v>0?"+":"") + v + " дБ", speed: v => "×" + (+v).toFixed(2).replace(/0$/,"")
 };
 function slider(id){
@@ -256,7 +324,8 @@ function render(){
   const f = [`brightness(${1 + st.brightness*2.2})`, `contrast(${st.contrast})`,
              `saturate(${st.bw ? 0 : 1.05})`, st.warmth > 0 ? `sepia(${st.warmth*5})` : `hue-rotate(${st.warmth*300}deg)`];
   if (st.retouch) f.push("blur(.25px)");
-  $("scene").style.filter = f.join(" ");
+  $("grade").style.filter = f.join(" ");
+  applyFilter($("fl"), st.filter, st.filter_strength);
   // заголовок
   const t = $("title");
   t.style.display = st.title ? "" : "none";
@@ -266,7 +335,8 @@ function render(){
   t.style.fontWeight = st.title_font === "Caveat" ? 600 : 700;
   t.style.color = st.title_fill ? "#151515" : hex();
   t.classList.toggle("fill", !!st.title_fill);
-  let txt = st.title_case === "upper" ? TITLE.toUpperCase() : st.title_case === "lower" ? TITLE : "Как я монтирую рилсы за пять минут";
+  const base = hook.trim() || "Как я монтирую рилсы за пять минут";
+  let txt = st.title_case === "upper" ? base.toUpperCase() : st.title_case === "lower" ? base.toLowerCase() : base;
   t.firstChild.textContent = st.title_typing ? txt.slice(0, typed) : txt;
   renderSubs();
 }
@@ -321,7 +391,7 @@ $("playIns").onclick = () => { haptic(); playInsert(); };
 
 // ---------- сохранение ----------
 function save(){
-  const out = {v: 1, ctx: init.ctx, style: st, speed: speed};
+  const out = {v: 1, ctx: init.ctx, style: st, speed: speed, hook: hook.trim()};
   const data = JSON.stringify(out);
   if (tg && tg.sendData && tg.initData !== undefined && tg.platform !== "unknown"){
     tg.sendData(data);              // бот получит настройки и продолжит
@@ -337,8 +407,10 @@ chips("title_case", CASES, "title_case");
 chips("title_font", TFONTS, "title_font");
 chips("insert_anim", ANIMS, "insert_anim", playInsert);
 chips("insert_pos", POS, "insert_pos", playInsert);
-swatches(); switches();
-["sub_scale","sub_y","title_y","title_scale","title_hold","brightness","warmth","contrast","volume_db","speed"].forEach(slider);
+swatches(); switches(); filters();
+$("hook").value = hook;
+$("hook").oninput = e => { hook = e.target.value; typed = 999; render(); };
+["sub_scale","sub_y","title_y","title_scale","title_hold","filter_strength","brightness","warmth","contrast","volume_db","speed"].forEach(slider);
 
 if (tg){
   tg.ready(); tg.expand();
@@ -355,7 +427,7 @@ setInterval(() => {               // «проигрывание» превью
   renderSubs();
 }, 380);
 setInterval(() => {
-  typed = typed >= TITLE.length + 14 ? 0 : typed + 1;
+  typed = typed >= (hook.trim() || TITLE).length + 14 ? 0 : typed + 1;
   if (st.title_typing) render();
 }, 70);
 new ResizeObserver(render).observe(phone);
