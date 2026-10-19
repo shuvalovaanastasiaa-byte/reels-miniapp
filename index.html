@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Оформление ролика</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Oswald:wght@500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141416; --panel:#1d1d21; --line:#2c2c32; --text:#f3f1ec; --muted:#9a978f;
+  --accent:#FFF0B8; --chip:#26262b; --chipOn:#f3f1ec; --chipOnText:#141416;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif}
+body{padding-bottom:96px}
+
+/* ---------- предпросмотр ---------- */
+.stage{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 88%,transparent);padding:12px 16px 14px;display:flex;gap:14px;align-items:flex-end}
+.phone{position:relative;width:min(40vw,176px);aspect-ratio:9/16;border-radius:18px;overflow:hidden;flex:none;
+  box-shadow:0 0 0 1px #ffffff14,0 18px 40px #0008;background:#222;container-type:inline-size}
+.scene{position:absolute;inset:0;
+  background:
+    radial-gradient(60% 34% at 50% 52%, #e9c3a6 0 38%, transparent 39%),
+    radial-gradient(34% 20% at 50% 36%, #3b2a22 0 60%, transparent 61%),
+    radial-gradient(120% 60% at 50% 100%, #5b4a6e 0 45%, transparent 46%),
+    linear-gradient(160deg,#6b7f8f,#3a4652 55%,#2a2f36);
+  transition:filter .25s}
+.scene::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0006)}
+.lbl{position:absolute;left:0;right:0;text-align:center;line-height:1.08;pointer-events:none}
+.title{font-weight:700;padding:0 6%}
+.title.fill span{background:var(--accent);color:#151515;padding:.04em .28em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.title:not(.fill){text-shadow:0 0 .35em #000a}
+.subs{padding:0 7%;text-shadow:0 0 .35em #000c}
+.subs .w{display:inline-block;margin:0 .12em;transition:opacity .12s}
+.subs .w.off{opacity:0}
+.subs .big{font-weight:800;color:var(--accent);display:block}
+.subs .small{font-weight:600;color:#fff}
+.subs.fill .w.cur{background:var(--accent);color:#151515;border-radius:.18em;padding:0 .15em;text-shadow:none}
+.ins{position:absolute;opacity:0;pointer-events:none}
+.ins .card{width:100%;height:100%;border-radius:7%;background:
+   radial-gradient(30% 30% at 75% 28%,#ffe58a 0 60%,transparent 62%),
+   linear-gradient(135deg,#ff9fb2,#a873d9);box-shadow:0 6px 14px #0007}
+.ins.polaroid .card{border:5px solid #fbfaf6;border-bottom-width:16px;border-radius:3px}
+.ins.full .card,.ins.half .card{border-radius:0}
+
+.side{flex:1;min-width:0}
+.side h1{font-size:18px;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+.side p{margin:0 0 10px;color:var(--muted);font-size:12.5px;line-height:1.35}
+.play{border:0;background:var(--chip);color:var(--text);font:600 12.5px Montserrat;padding:9px 12px;border-radius:12px;width:100%}
+
+/* ---------- настройки ---------- */
+main{padding:4px 16px 0}
+section{background:var(--panel);border-radius:18px;padding:14px 14px 12px;margin:0 0 12px;border:1px solid var(--line)}
+section h2{font-size:14px;margin:0 0 10px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.row{margin:10px 0 2px}
+.row>label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:7px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:0;background:var(--chip);color:var(--text);font:600 13px Montserrat;padding:9px 12px;border-radius:12px}
+.chip.on{background:var(--chipOn);color:var(--chipOnText)}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid transparent;padding:0;box-shadow:inset 0 0 0 1px #0003}
+.sw.on{border-color:#fff;outline:2px solid var(--bg);outline-offset:-4px}
+.sw.custom{background:conic-gradient(#ff8a8a,#ffd36b,#8cf5a8,#8fd8ff,#c59bff,#ff8a8a);position:relative;overflow:hidden}
+.sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+input[type=range]{width:100%;accent-color:var(--accent);height:26px}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;font-weight:600}
+.tog:first-of-type{border-top:0}
+.tog small{display:block;color:var(--muted);font-weight:500;font-size:11.5px;margin-top:2px}
+.switch{width:46px;height:28px;border-radius:14px;background:#3a3a41;border:0;position:relative;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.switch.on{background:#34c759}
+.switch.on::after{left:21px}
+.save{position:fixed;left:16px;right:16px;bottom:14px;border:0;border-radius:16px;padding:16px;font:800 15px Montserrat;
+  background:var(--chipOn);color:var(--chipOnText);display:none;z-index:9}
+.hint{color:var(--muted);font-size:11.5px;margin:8px 2px 0;line-height:1.35}
+
+@keyframes a-pop{0%{transform:scale(.55);opacity:0}18%{opacity:1}30%{transform:scale(1.07)}40%,86%{transform:scale(1);opacity:1}100%{transform:scale(.88);opacity:0}}
+@keyframes a-slide{0%{transform:translateX(-140cqw)}20%,84%{transform:none}100%{transform:translateX(140cqw)}}
+@keyframes a-slideR{0%{transform:translateX(140cqw)}20%,84%{transform:none}100%{transform:translateX(-140cqw)}}
+@keyframes a-rise{0%{transform:translateY(40cqw);opacity:0}22%,86%{transform:none;opacity:1}100%{opacity:0}}
+@keyframes a-zoom{0%{opacity:0;transform:scale(1)}10%{opacity:1}88%{opacity:1}100%{opacity:0;transform:scale(1.14)}}
+@keyframes a-float{0%{opacity:0;transform:scale(.85)}15%{opacity:1;transform:scale(1)}30%{transform:translateY(-3%) rotate(2deg)}50%{transform:translateY(3%) rotate(-2deg)}70%{transform:translateY(-3%) rotate(2deg)}86%{opacity:1}100%{opacity:0}}
+@keyframes a-spin{0%{transform:rotate(-30deg) scale(.45);opacity:0}25%{transform:rotate(3deg) scale(1.05);opacity:1}35%,86%{transform:none;opacity:1}100%{opacity:0;transform:scale(.88)}}
+@keyframes a-polaroid{0%{transform:translateY(-60cqw) rotate(-15deg) scale(1.06);opacity:0}25%,86%{transform:rotate(-3deg);opacity:1}100%{opacity:0;transform:rotate(-3deg) scale(.9)}}
+@keyframes a-fade{0%{opacity:0}12%,88%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="scene" id="scene"></div>
+    <div class="ins" id="ins"><div class="card"></div></div>
+    <div class="lbl title" id="title"><span></span></div>
+    <div class="lbl subs" id="subs"></div>
+  </div>
+  <div class="side">
+    <h1>Оформление ролика</h1>
+    <p>Меняй настройки — превью справа обновляется сразу. Потом нажми «Сохранить».</p>
+    <button class="play" id="playIns">▶ Показать вставку фото</button>
+  </div>
+</div>
+
+<main>
+  <section>
+    <h2>Субтитры</h2>
+    <div class="chips" id="sub_mode"></div>
+    <div class="row"><label>Размер <span id="v_sub_scale"></span></label><input type="range" id="sub_scale" min="0.6" max="1.8" step="0.05"></div>
+    <div class="row"><label>Положение по высоте <span id="v_sub_y"></span></label><input type="range" id="sub_y" min="0.3" max="0.9" step="0.01"></div>
+    <div class="row"><label>Шрифт</label><div class="chips" id="sub_font"></div></div>
+  </section>
+
+  <section>
+    <h2>Цвет подсветки</h2>
+    <div class="chips" id="accent"></div>
+    <p class="hint">Им выделяются главное слово в субтитрах, заголовок и надписи.</p>
+  </section>
+
+  <section>
+    <h2>Заголовок <button class="switch" id="title_sw" aria-label="Заголовок"></button></h2>
+    <div id="titleOpts">
+      <div class="row"><label>Буквы</label><div class="chips" id="title_case"></div></div>
+      <div class="row"><label>Шрифт</label><div class="chips" id="title_font"></div></div>
+      <div class="tog">Печатать по буквам<button class="switch" data-k="title_typing"></button></div>
+      <div class="tog">Цветная плашка под текстом<button class="switch" data-k="title_fill"></button></div>
+      <div class="row"><label>Высота <span id="v_title_y"></span></label><input type="range" id="title_y" min="0.06" max="0.45" step="0.01"></div>
+      <div class="row"><label>Размер <span id="v_title_scale"></span></label><input type="range" id="title_scale" min="0.6" max="1.8" step="0.05"></div>
+      <div class="row"><label>Сколько держится <span id="v_title_hold"></span></label><input type="range" id="title_hold" min="2" max="12" step="0.5"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Фото, гифки и стикеры</h2>
+    <div class="row" style="margin-top:0"><label>Как появляются</label><div class="chips" id="insert_anim"></div></div>
+    <div class="row"><label>Где показывать</label><div class="chips" id="insert_pos"></div></div>
+    <p class="hint">Это настройка по умолчанию — для каждого фото её можно поменять кнопками, когда пришлёшь файл.</p>
+  </section>
+
+  <section>
+    <h2>Картинка</h2>
+    <div class="row" style="margin-top:0"><label>Яркость <span id="v_brightness"></span></label><input type="range" id="brightness" min="-0.2" max="0.2" step="0.01"></div>
+    <div class="row"><label>Теплота <span id="v_warmth"></span></label><input type="range" id="warmth" min="-0.08" max="0.08" step="0.005"></div>
+    <div class="row"><label>Контраст <span id="v_contrast"></span></label><input type="range" id="contrast" min="0.8" max="1.4" step="0.01"></div>
+    <div class="tog">Чёрно-белое<button class="switch" data-k="bw"></button></div>
+    <div class="tog"><span>Сгладить кожу<small>лёгкая ретушь</small></span><button class="switch" data-k="retouch"></button></div>
+  </section>
+
+  <section>
+    <h2>Динамика и звук</h2>
+    <div class="tog"><span>Наезды камеры<small>на сильных фразах</small></span><button class="switch" data-k="zooms"></button></div>
+    <div class="tog"><span>Плашки на «во-первых…»</span><button class="switch" data-k="cards"></button></div>
+    <div class="tog"><span>Звуки<small>клавиатура, вуп, касса, свуш</small></span><button class="switch" data-k="sfx"></button></div>
+    <div class="tog">Фоновая музыка<button class="switch" data-k="music"></button></div>
+    <div class="tog"><span>Почистить звук от шума</span><button class="switch" data-k="denoise"></button></div>
+    <div class="row"><label>Громкость голоса <span id="v_volume_db"></span></label><input type="range" id="volume_db" min="-9" max="9" step="1"></div>
+    <div class="row"><label>Скорость речи <span id="v_speed"></span></label><input type="range" id="speed" min="1" max="1.6" step="0.05"></div>
+  </section>
+</main>
+
+<button class="save" id="save">Сохранить</button>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+const ACCENTS = {"кремовый":"#FFF0B8","жёлтый":"#FFD84D","розовый":"#FF9FD0","зелёный":"#8CF5A8","голубой":"#8FD8FF","белый":"#FFFFFF"};
+const MODES = {dynamic:"Динамичные",karaoke:"Слово за словом",fill:"Закраска",one:"Одно слово",none:"Без субтитров"};
+const ANIMS = {pop:"Выпрыгивание",slide:"Выезд сбоку",rise:"Всплытие",zoom:"Приближение",float:"Парение",spin:"С поворотом",polaroid:"Полароид",fade:"Плавно"};
+const POS = {top:"Сверху",center:"По центру",bottom:"Снизу",left:"Слева",right:"Справа",half:"Половина экрана",full:"Весь экран"};
+const FONTS = {Montserrat:"Montserrat",Oswald:"Oswald"};
+const TFONTS = {Montserrat:"Montserrat",Oswald:"Oswald",Caveat:"Рукописный"};
+const CASES = {lower:"строчные",upper:"ЗАГЛАВНЫЕ",as_is:"Как в речи"};
+const DEF = {sub_mode:"dynamic",accent:"кремовый",sub_font:"Montserrat",sub_scale:1,sub_y:.74,title:true,title_case:"lower",
+  title_font:"Montserrat",title_fill:false,title_typing:true,title_y:.17,title_scale:1,title_hold:6,cards:true,insert_anim:"pop",
+  insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,bw:false,retouch:false,zooms:true,sfx:true,music:true,denoise:false,volume_db:0};
+
+// настройки приходят от бота в адресе: #s=<base64 json>&ctx=new|edit
+function readHash(){
+  const h = new URLSearchParams(location.hash.slice(1));
+  let s = {};
+  try{
+    let b = (h.get("s") || "").replace(/ /g, "+").replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    s = JSON.parse(decodeURIComponent(escape(atob(b))));
+  }catch(e){}
+  return {s, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.3")};
+}
+const init = readHash();
+const st = Object.assign({}, DEF, init.s);
+let speed = init.speed;
+const $ = id => document.getElementById(id);
+const hex = () => ACCENTS[st.accent] || (String(st.accent).startsWith("#") ? st.accent : "#FFF0B8");
+const haptic = () => { try{ tg && tg.HapticFeedback.selectionChanged(); }catch(e){} };
+
+// ---------- элементы управления ----------
+function chips(id, opts, key, cb){
+  const box = $(id); box.innerHTML = "";
+  for (const [v, name] of Object.entries(opts)){
+    const b = document.createElement("button");
+    b.className = "chip" + (st[key] === v ? " on" : ""); b.textContent = name;
+    b.onclick = () => { st[key] = v; haptic(); chips(id, opts, key, cb); render(); cb && cb(); };
+    box.appendChild(b);
+  }
+}
+function swatches(){
+  const box = $("accent"); box.innerHTML = "";
+  for (const [n, c] of Object.entries(ACCENTS)){
+    const b = document.createElement("button");
+    b.className = "sw" + (st.accent === n ? " on" : ""); b.style.background = c; b.title = n;
+    b.onclick = () => { st.accent = n; haptic(); swatches(); render(); };
+    box.appendChild(b);
+  }
+  const c = document.createElement("label");
+  c.className = "sw custom" + (String(st.accent).startsWith("#") ? " on" : "");
+  c.innerHTML = '<input type="color" value="' + hex() + '">';
+  c.querySelector("input").oninput = e => { st.accent = e.target.value.toUpperCase(); swatches(); render(); };
+  box.appendChild(c);
+}
+const FMT = {
+  sub_scale: v => Math.round(v*100) + "%", title_scale: v => Math.round(v*100) + "%",
+  sub_y: v => Math.round(v*100) + "%", title_y: v => Math.round(v*100) + "%",
+  title_hold: v => v + " с", brightness: v => (v>0?"+":"") + Math.round(v*500) + "%",
+  warmth: v => (v>0?"+":"") + Math.round(v*1250) + "%", contrast: v => Math.round(v*100) + "%",
+  volume_db: v => (v>0?"+":"") + v + " дБ", speed: v => "×" + (+v).toFixed(2).replace(/0$/,"")
+};
+function slider(id){
+  const el = $(id), isSpeed = id === "speed";
+  el.value = isSpeed ? speed : st[id];
+  const show = () => $("v_" + id).textContent = FMT[id](isSpeed ? speed : st[id]);
+  el.oninput = () => { const v = parseFloat(el.value); if (isSpeed) speed = v; else st[id] = v; show(); render(); };
+  show();
+}
+function switches(){
+  document.querySelectorAll(".switch[data-k]").forEach(b => {
+    const k = b.dataset.k; b.classList.toggle("on", !!st[k]);
+    b.onclick = () => { st[k] = !st[k]; haptic(); switches(); render(); };
+  });
+  const t = $("title_sw"); t.classList.toggle("on", !!st.title);
+  t.onclick = () => { st.title = !st.title; haptic(); switches(); render(); };
+  $("titleOpts").style.opacity = st.title ? 1 : .35;
+  $("titleOpts").style.pointerEvents = st.title ? "" : "none";
+}
+
+// ---------- превью ----------
+const phone = $("phone");
+const K = () => phone.clientWidth / 1080;      // пиксели ролика → пиксели превью
+const PHRASE = "сегодня покажу как я монтирую рилсы за пять минут".split(" ");
+const BLOCKS = [[0,1,2,3],[4,5,6],[7,8]];
+const TITLE = "как я монтирую рилсы за пять минут";
+let tick = 0, typed = 0;
+
+function render(){
+  const k = K();
+  document.documentElement.style.setProperty("--accent", hex());
+  // картинка
+  const f = [`brightness(${1 + st.brightness*2.2})`, `contrast(${st.contrast})`,
+             `saturate(${st.bw ? 0 : 1.05})`, st.warmth > 0 ? `sepia(${st.warmth*5})` : `hue-rotate(${st.warmth*300}deg)`];
+  if (st.retouch) f.push("blur(.25px)");
+  $("scene").style.filter = f.join(" ");
+  // заголовок
+  const t = $("title");
+  t.style.display = st.title ? "" : "none";
+  t.style.top = (st.title_y * 100) + "%";
+  t.style.fontSize = (64 * st.title_scale * k) + "px";
+  t.style.fontFamily = st.title_font;
+  t.style.fontWeight = st.title_font === "Caveat" ? 600 : 700;
+  t.style.color = st.title_fill ? "#151515" : hex();
+  t.classList.toggle("fill", !!st.title_fill);
+  let txt = st.title_case === "upper" ? TITLE.toUpperCase() : st.title_case === "lower" ? TITLE : "Как я монтирую рилсы за пять минут";
+  t.firstChild.textContent = st.title_typing ? txt.slice(0, typed) : txt;
+  renderSubs();
+}
+
+function renderSubs(){
+  const k = K(), box = $("subs"), sc = st.sub_scale;
+  box.style.display = st.sub_mode === "none" ? "none" : "";
+  box.style.top = (st.sub_y * 100) + "%";
+  box.style.transform = "translateY(-50%)";
+  box.style.fontFamily = st.sub_font;
+  box.className = "lbl subs" + (st.sub_mode === "fill" ? " fill" : "");
+  const b = BLOCKS[Math.floor(tick / 5) % BLOCKS.length];
+  const shown = Math.min(tick % 5, b.length - 1);   // сколько слов блока уже прозвучало
+  const w = (i, cls = "") => `<span class="w ${cls}">${PHRASE[i]}</span>`;
+  if (st.sub_mode === "dynamic"){
+    const big = b.reduce((a, i) => PHRASE[i].length > PHRASE[a].length ? i : a, b[0]);
+    const pre = b.filter(i => i < big), post = b.filter(i => i > big);
+    const vis = i => b.indexOf(i) <= shown ? "" : "off";
+    box.innerHTML =
+      (pre.length ? `<div class="small" style="font-size:${46*sc*k}px">${pre.map(i => w(i, vis(i))).join(" ")}</div>` : "") +
+      `<div class="big" style="font-size:${92*sc*k}px">${w(big, vis(big))}</div>` +
+      (post.length ? `<div class="small" style="font-size:${46*sc*k}px">${post.map(i => w(i, vis(i))).join(" ")}</div>` : "");
+  } else if (st.sub_mode === "one"){
+    const i = b[Math.min(shown, b.length - 1)];
+    box.innerHTML = `<span class="w" style="font-weight:800;font-size:${104*sc*k}px;color:${PHRASE[i].length >= 6 ? hex() : "#fff"}">${PHRASE[i]}</span>`;
+  } else {
+    const fill = st.sub_mode === "fill";
+    box.innerHTML = `<div style="font-weight:700;font-size:${62*sc*k}px;color:#fff">` + b.map((i, j) => {
+      if (fill) return w(i, j === Math.min(shown, b.length - 1) ? "cur" : "");
+      if (j > shown) return w(i, "off");
+      return j === shown ? `<span class="w" style="color:${hex()}">${PHRASE[i]}</span>` : w(i);
+    }).join(" ") + "</div>";
+  }
+}
+
+// вставка фото: та же анимация и место, что в ролике
+const LAYOUT = {top:[540,700,760,560],center:[540,930,820,620],bottom:[540,1130,720,520],left:[300,640,440,440],
+                right:[780,640,440,440],half:[540,480,1080,960],full:[540,960,1080,1920]};
+function playInsert(){
+  const el = $("ins"), k = K();
+  const [cx, cy, w, h] = LAYOUT[st.insert_pos] || LAYOUT.top;
+  const ww = st.insert_pos === "left" || st.insert_pos === "right" ? 400 : w;
+  const hh = st.insert_pos === "left" || st.insert_pos === "right" ? 400 : h;
+  el.className = "ins " + st.insert_pos + (st.insert_anim === "polaroid" ? " polaroid" : "");
+  Object.assign(el.style, {left: (cx - ww/2)*k + "px", top: (cy - hh/2)*k + "px", width: ww*k + "px", height: hh*k + "px",
+    animation: "none"});
+  void el.offsetWidth;
+  const name = st.insert_anim === "slide" && st.insert_pos === "right" ? "a-slideR" : "a-" + st.insert_anim;
+  el.style.animation = `${name} 2.6s cubic-bezier(.2,.8,.2,1) both`;
+}
+$("playIns").onclick = () => { haptic(); playInsert(); };
+
+// ---------- сохранение ----------
+function save(){
+  const out = {v: 1, ctx: init.ctx, style: st, speed: speed};
+  const data = JSON.stringify(out);
+  if (tg && tg.sendData && tg.initData !== undefined && tg.platform !== "unknown"){
+    tg.sendData(data);              // бот получит настройки и продолжит
+  } else {
+    alert("Настройки:\n" + data);   // открыто не в Telegram — просто показываем
+  }
+}
+
+// ---------- запуск ----------
+chips("sub_mode", MODES, "sub_mode");
+chips("sub_font", FONTS, "sub_font");
+chips("title_case", CASES, "title_case");
+chips("title_font", TFONTS, "title_font");
+chips("insert_anim", ANIMS, "insert_anim", playInsert);
+chips("insert_pos", POS, "insert_pos", playInsert);
+swatches(); switches();
+["sub_scale","sub_y","title_y","title_scale","title_hold","brightness","warmth","contrast","volume_db","speed"].forEach(slider);
+
+if (tg){
+  tg.ready(); tg.expand();
+  try{ tg.setHeaderColor("#141416"); tg.setBackgroundColor("#141416"); }catch(e){}
+  tg.MainButton.setParams({text: init.ctx === "edit" ? "Применить к ролику" : "Сохранить и продолжить",
+                           color: "#f3f1ec", text_color: "#141416"});
+  tg.MainButton.onClick(save);
+  tg.MainButton.show();
+}
+if (!tg || tg.platform === "unknown"){ const b = $("save"); b.style.display = "block"; b.onclick = save; }
+
+setInterval(() => {               // «проигрывание» превью
+  tick = (tick + 1) % (BLOCKS.length * 5);
+  renderSubs();
+}, 380);
+setInterval(() => {
+  typed = typed >= TITLE.length + 14 ? 0 : typed + 1;
+  if (st.title_typing) render();
+}, 70);
+new ResizeObserver(render).observe(phone);
+render();
+setTimeout(playInsert, 600);
+</script>
+</body>
+</html>
