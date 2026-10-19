@@ -185,6 +185,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:26px}
 </main>
 
 <button class="save" id="save">Сохранить</button>
+<p id="dbg" style="text-align:center;color:#555;font-size:10px;margin:8px 0 90px"></p>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -236,6 +237,8 @@ const init = readHash();
 const st = Object.assign({}, DEF, init.s);
 let speed = init.speed;
 let hook = init.hook || "";
+try{ document.getElementById("dbg").textContent = "v7 · адрес " + location.href.length + " · кадр " + (init.frame ? init.frame.length : "нет")
+       + " · ключи " + [...new URLSearchParams(location.hash.slice(1)).keys()].filter(k => !k.startsWith("tgWebApp")).join(","); }catch(e){}
 if (init.frame){                  // кадр из видео клиента вместо нарисованного силуэта
   document.documentElement.style.setProperty("--frame", `url("data:image/jpeg;base64,${init.frame}")`);
   document.body.classList.add("real");
