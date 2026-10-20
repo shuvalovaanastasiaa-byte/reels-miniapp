@@ -2,458 +2,720 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Оформление ролика</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Настройки монтажа</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Oswald:wght@500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@500;600;700;800&family=Unbounded:wght@600;700;800&family=Golos+Text:wght@500;600;700;800&family=Manrope:wght@500;600;700;800&family=Oswald:wght@600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#141416; --panel:#1d1d21; --line:#2c2c32; --text:#f3f1ec; --muted:#9a978f;
-  --accent:#FFF0B8; --chip:#26262b; --chipOn:#f3f1ec; --chipOnText:#141416;
+  --bg:#141110; --panel:#1d1917; --chip:#2a2421; --chip2:#231e1c; --line:#2e2724;
+  --text:#f3ece8; --muted:#8f847f; --acc:#c9968a; --accText:#2a1a16; --accent:#FFF0B8;
+  --tab:72px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif}
-body{padding-bottom:96px}
+html,body{margin:0;background:var(--bg);color:var(--text);font:500 14px/1.35 Montserrat,system-ui,sans-serif}
+body{padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;cursor:pointer}
+.serif{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.01em}
 
-/* ---------- предпросмотр ---------- */
-.stage{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 88%,transparent);padding:12px 16px 14px;display:flex;gap:14px;align-items:flex-end}
-.phone{position:relative;width:min(40vw,176px);aspect-ratio:9/16;border-radius:18px;overflow:hidden;flex:none;
-  box-shadow:0 0 0 1px #ffffff14,0 18px 40px #0008;background:#222;container-type:inline-size}
+/* ---------- шапка ---------- */
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+header h1{margin:0;font-size:24px}
+.done{border:0;background:var(--acc);color:var(--accText);border-radius:999px;padding:10px 20px;font-weight:600;font-size:15px}
+
+/* ---------- превью ---------- */
+.stagewrap{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 10px}
+.stage{position:relative;display:flex;justify-content:center}
+.phone{position:relative;width:min(46vw,200px);aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#0d0b0a;
+  container-type:inline-size;box-shadow:0 0 0 1px #ffffff12;transition:width .3s}
+.stage.big .phone{width:min(92vw,420px)}
+.fs{position:absolute;left:calc(50% + min(23vw,100px) + 10px);bottom:4px;width:38px;height:38px;border-radius:50%;border:0;background:var(--chip);display:grid;place-items:center}
+.stage.big .fs{left:auto;right:18px}
 .scene{position:absolute;inset:0;
-  background:
-    radial-gradient(60% 34% at 50% 52%, #e9c3a6 0 38%, transparent 39%),
-    radial-gradient(34% 20% at 50% 36%, #3b2a22 0 60%, transparent 61%),
-    radial-gradient(120% 60% at 50% 100%, #5b4a6e 0 45%, transparent 46%),
-    linear-gradient(160deg,#6b7f8f,#3a4652 55%,#2a2f36);
-  transition:filter .25s}
+  background:radial-gradient(60% 34% at 50% 52%,#e9c3a6 0 38%,transparent 39%),radial-gradient(34% 20% at 50% 36%,#3b2a22 0 60%,transparent 61%),
+  radial-gradient(120% 60% at 50% 100%,#5b4a6e 0 45%,transparent 46%),linear-gradient(160deg,#6b7f8f,#3a4652 55%,#2a2f36)}
 .real .scene{background:var(--frame) center/cover no-repeat}
 .real #grade .scene{animation:kb 9s ease-in-out infinite alternate}
 @keyframes kb{from{transform:scale(1)}to{transform:scale(1.08) translateY(-1.5%)}}
-.scene::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0006)}
 .grade,.fl{position:absolute;inset:0;transition:filter .25s,opacity .25s}
 .tint,.vig{position:absolute;inset:0;pointer-events:none}
 .vig{background:radial-gradient(75% 60% at 50% 50%,transparent 45%,#000 120%)}
-.flts{display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px 4px;scrollbar-width:none}
-.flts::-webkit-scrollbar{display:none}
-.ft{flex:none;width:64px;border:0;background:none;padding:0;color:var(--muted);font:600 11.5px Montserrat;text-align:center}
-.ft .th{position:relative;width:64px;height:84px;border-radius:12px;overflow:hidden;margin-bottom:5px;border:2px solid transparent}
-.ft.on{color:var(--text)}
-.ft.on .th{border-color:#fff}
-.ft .th .scene::after{display:none}
-.txt{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--chip);color:var(--text);
-  font:600 14px Montserrat;padding:11px 12px;border-radius:12px;outline:none}
-.txt:focus{border-color:var(--accent)}
-.lbl{position:absolute;left:0;right:0;text-align:center;line-height:1.08;pointer-events:none}
-.title{font-weight:700;padding:0 6%}
-.title.fill span{background:var(--accent);color:#151515;padding:.04em .28em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.safe{position:absolute;left:0;right:0;font-size:max(7px,4cqw);color:#ffffffb0;padding:2px 6px;pointer-events:none;z-index:4}
+.safe.top{top:0;height:10%;border-bottom:1px dashed #ffffff80}
+.safe.bot{bottom:0;height:16%;border-top:1px dashed #ffffff60;display:flex;align-items:flex-end;padding-bottom:4px}
+.lbl{position:absolute;left:0;right:0;text-align:center;line-height:1.1;pointer-events:none;z-index:3}
+.title{padding:0 6%}
+.title span{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.title.fill span{padding:.04em .28em;border-radius:.2em}
 .title:not(.fill){text-shadow:0 0 .35em #000a}
-.subs{padding:0 7%;text-shadow:0 0 .35em #000c}
-.subs .w{display:inline-block;margin:0 .12em;transition:opacity .12s}
-.subs .w.off{opacity:0}
-.subs .big{font-weight:800;color:var(--accent);display:block}
-.subs .small{font-weight:600;color:#fff}
-.subs.fill .w.cur{background:var(--accent);color:#151515;border-radius:.18em;padding:0 .15em;text-shadow:none}
-.ins{position:absolute;opacity:0;pointer-events:none}
-.ins .card{width:100%;height:100%;border-radius:7%;background:
-   radial-gradient(30% 30% at 75% 28%,#ffe58a 0 60%,transparent 62%),
-   linear-gradient(135deg,#ff9fb2,#a873d9);box-shadow:0 6px 14px #0007}
+.subs{padding:0 6%}
+.subs .w{display:inline-block;margin:0 .11em;transition:opacity .12s}
+.subs .off{opacity:0}
+.subs .line{display:block}
+.pl-shadow .w{text-shadow:0 0 .3em #000c,0 0 .1em #000}
+.pl-none .w{text-shadow:0 0 1px #000,0 0 1px #000}
+.pl-box .line{display:inline;background:#000a;padding:.05em .25em;border-radius:.15em;-webkit-box-decoration-break:clone;box-decoration-break:clone;line-height:1.5}
+.phrasebg{display:inline-block;background:#0009;border-radius:.4em;padding:.35em .5em}
+.contrast .line{display:inline;background:#fff;color:#151515;padding:.05em .3em;border-radius:.12em;line-height:1.5}
+.emo{position:absolute;left:50%;transform:translate(-50%,-50%);font-size:12cqw;z-index:3;animation:emo 2.4s ease infinite}
+@keyframes emo{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}12%,80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0}}
+.ins{position:absolute;opacity:0;pointer-events:none;z-index:2}
+.ins .card{width:100%;height:100%;border-radius:7%;background:radial-gradient(30% 30% at 75% 28%,#ffe58a 0 60%,transparent 62%),linear-gradient(135deg,#ff9fb2,#a873d9);box-shadow:0 6px 14px #0007}
 .ins.polaroid .card{border:5px solid #fbfaf6;border-bottom-width:16px;border-radius:3px}
 .ins.full .card,.ins.half .card{border-radius:0}
-
-.side{flex:1;min-width:0}
-.side h1{font-size:18px;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
-.side p{margin:0 0 10px;color:var(--muted);font-size:12.5px;line-height:1.35}
-.play{border:0;background:var(--chip);color:var(--text);font:600 12.5px Montserrat;padding:9px 12px;border-radius:12px;width:100%}
-
-/* ---------- настройки ---------- */
-main{padding:4px 16px 0}
-section{background:var(--panel);border-radius:18px;padding:14px 14px 12px;margin:0 0 12px;border:1px solid var(--line)}
-section h2{font-size:14px;margin:0 0 10px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
-.row{margin:10px 0 2px}
-.row>label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:7px;font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{border:0;background:var(--chip);color:var(--text);font:600 13px Montserrat;padding:9px 12px;border-radius:12px}
-.chip.on{background:var(--chipOn);color:var(--chipOnText)}
-.sw{width:34px;height:34px;border-radius:50%;border:2px solid transparent;padding:0;box-shadow:inset 0 0 0 1px #0003}
-.sw.on{border-color:#fff;outline:2px solid var(--bg);outline-offset:-4px}
-.sw.custom{background:conic-gradient(#ff8a8a,#ffd36b,#8cf5a8,#8fd8ff,#c59bff,#ff8a8a);position:relative;overflow:hidden}
-.sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%}
-input[type=range]{width:100%;accent-color:var(--accent);height:26px}
-.tog{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;font-weight:600}
-.tog:first-of-type{border-top:0}
-.tog small{display:block;color:var(--muted);font-weight:500;font-size:11.5px;margin-top:2px}
-.switch{width:46px;height:28px;border-radius:14px;background:#3a3a41;border:0;position:relative;flex:none;transition:background .2s}
-.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
-.switch.on{background:#34c759}
-.switch.on::after{left:21px}
-.save{position:fixed;left:16px;right:16px;bottom:14px;border:0;border-radius:16px;padding:16px;font:800 15px Montserrat;
-  background:var(--chipOn);color:var(--chipOnText);display:none;z-index:9}
-.scale{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px;margin-top:2px}
-.hint{color:var(--muted);font-size:11.5px;margin:8px 2px 0;line-height:1.35}
-
 @keyframes a-pop{0%{transform:scale(.55);opacity:0}18%{opacity:1}30%{transform:scale(1.07)}40%,86%{transform:scale(1);opacity:1}100%{transform:scale(.88);opacity:0}}
-@keyframes a-slide{0%{transform:translateX(-140cqw)}20%,84%{transform:none}100%{transform:translateX(140cqw)}}
-@keyframes a-slideR{0%{transform:translateX(140cqw)}20%,84%{transform:none}100%{transform:translateX(-140cqw)}}
+@keyframes a-slide{0%{transform:translateX(-140cqw)}20%,84%{transform:none;opacity:1}100%{transform:translateX(140cqw)}}
+@keyframes a-slideR{0%{transform:translateX(140cqw)}20%,84%{transform:none;opacity:1}100%{transform:translateX(-140cqw)}}
 @keyframes a-rise{0%{transform:translateY(40cqw);opacity:0}22%,86%{transform:none;opacity:1}100%{opacity:0}}
 @keyframes a-zoom{0%{opacity:0;transform:scale(1)}10%{opacity:1}88%{opacity:1}100%{opacity:0;transform:scale(1.14)}}
 @keyframes a-float{0%{opacity:0;transform:scale(.85)}15%{opacity:1;transform:scale(1)}30%{transform:translateY(-3%) rotate(2deg)}50%{transform:translateY(3%) rotate(-2deg)}70%{transform:translateY(-3%) rotate(2deg)}86%{opacity:1}100%{opacity:0}}
 @keyframes a-spin{0%{transform:rotate(-30deg) scale(.45);opacity:0}25%{transform:rotate(3deg) scale(1.05);opacity:1}35%,86%{transform:none;opacity:1}100%{opacity:0;transform:scale(.88)}}
 @keyframes a-polaroid{0%{transform:translateY(-60cqw) rotate(-15deg) scale(1.06);opacity:0}25%,86%{transform:rotate(-3deg);opacity:1}100%{opacity:0;transform:rotate(-3deg) scale(.9)}}
 @keyframes a-fade{0%{opacity:0}12%,88%{opacity:1}100%{opacity:0}}
+
+/* ---------- панель настроек ---------- */
+.panel{background:var(--panel);border-radius:22px 22px 0 0;min-height:52vh;padding:16px 16px 24px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ph h2{margin:0;font-size:22px}
+.link{border:0;background:none;color:var(--acc);font-weight:600;font-size:14px;padding:4px 0}
+.back{border:0;background:none;color:var(--text);font-size:22px;padding:0 8px 0 0}
+.seg{display:flex;background:var(--chip2);border-radius:999px;padding:4px;gap:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:11px 6px;font-weight:500;font-size:15px;color:var(--text)}
+.seg button.on{background:var(--acc);color:var(--accText)}
+.row{margin:16px 0 4px}
+.rowh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lab{color:var(--muted);font-size:13.5px;margin-bottom:8px}
+.lab b{color:var(--text);font-weight:600;float:right}
+.rowh .t{font-size:15.5px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+.chip{flex:none;border:0;background:var(--chip);border-radius:999px;padding:10px 16px;font-size:14px;font-weight:500;white-space:nowrap}
+.chip.on{background:var(--acc);color:var(--accText)}
+.pills{display:flex;background:var(--chip2);border-radius:999px;padding:3px}
+.pills button{border:0;background:none;padding:8px 14px;border-radius:999px;font-size:13.5px}
+.pills button.on{background:var(--acc);color:var(--accText)}
+.cards{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px 2px}
+.cards::-webkit-scrollbar{display:none}
+.scard{flex:none;width:31%;min-width:104px;border:0;background:var(--chip2);border-radius:14px;padding:0;overflow:hidden;text-align:center}
+.scard .sm{height:46px;display:grid;place-items:center;background:#0e0c0b;font-size:17px;white-space:nowrap;overflow:hidden;padding:0 6px}
+.scard .nm{padding:9px 4px;font-size:13px}
+.scard.on .nm{background:var(--acc);color:var(--accText)}
+.ft{flex:none;width:31%;min-width:104px;border:0;background:none;padding:0;text-align:center;font-size:13px}
+.ft .th{position:relative;height:86px;border-radius:14px;overflow:hidden;border:2px solid transparent}
+.ft .th .scene::after{display:none}
+.ft .nm{position:absolute;left:0;right:0;bottom:6px;color:#fff;text-shadow:0 1px 4px #000;font-size:13px}
+.ft.on .th{border-color:var(--acc)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:none;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(var(--acc),var(--acc)) 0/var(--p,50%) 100% no-repeat,#3a3330}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#e9c9c0;margin-top:-9.5px;box-shadow:0 1px 4px #0008}
+input[type=range]::-moz-range-track{height:3px;background:#3a3330}
+input[type=range]::-moz-range-progress{height:3px;background:var(--acc)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#e9c9c0;border:0}
+.scale{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:2px}
+.sw{position:relative;width:46px;height:28px;border-radius:14px;border:0;background:#3a3330;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.sw.on{background:var(--acc)}.sw.on::after{left:21px;background:#1d1917}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:12px 0;font-size:15.5px;gap:12px}
+.tog small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.dots{display:flex;flex-wrap:wrap;gap:12px}
+.dot{width:40px;height:40px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px #0003;padding:0}
+.dot.on{outline:2px solid var(--acc);outline-offset:3px}
+.dot.all{background:var(--chip);color:var(--text);font-size:12px;font-weight:600;position:relative;overflow:hidden}
+.dot.all input{position:absolute;inset:0;opacity:0}
+.txt{width:100%;min-height:84px;resize:vertical;border:1px solid var(--line);background:var(--chip2);color:var(--text);border-radius:14px;padding:12px;font:500 15px Montserrat}
+.txt:focus{outline:none;border-color:var(--acc)}
+.btn{width:100%;border:0;border-radius:16px;padding:15px;background:var(--acc);color:var(--accText);font-weight:600;font-size:16px;margin-top:18px}
+.btn.ghost{background:var(--chip2);color:var(--text)}
+.sub{color:var(--muted);font-size:12.5px;margin-top:6px}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.preset{display:flex;align-items:center;gap:8px;margin-top:8px}
+.preset .chip{flex:1;text-align:left}
+.preset .x{border:0;background:var(--chip2);width:40px;height:40px;border-radius:50%;color:var(--muted)}
+
+/* ---------- вкладки ---------- */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;background:var(--panel);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;border:0;background:none;color:var(--muted);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;position:relative}
+nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6}
+nav button.on{color:var(--acc)}
+nav button.on::before{content:"";position:absolute;top:-7px;width:26px;height:2px;border-radius:2px;background:var(--acc)}
+
+/* ---------- мастер ---------- */
+.wiz{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;padding:12px 16px 30px;display:none}
+.wiz.show{display:block}
+.prog{display:flex;gap:6px;justify-content:center;margin:6px 0 18px}
+.prog i{width:56px;height:3px;border-radius:2px;background:#3a3330}
+.prog i.on{background:var(--acc)}
+.wiz h2{font-size:26px;margin:0 0 14px}
+.wiz .phone{margin:0 auto 14px;width:min(44vw,190px)}
 </style>
 </head>
 <body>
 
-<div class="stage">
-  <div class="phone" id="phone">
-    <div class="grade" id="grade"><div class="scene"></div>
-      <div class="fl" id="fl"><div class="scene"></div><div class="tint" id="tint"></div><div class="vig" id="vig"></div></div></div>
-    <div class="ins" id="ins"><div class="card"></div></div>
-    <div class="lbl title" id="title"><span></span></div>
-    <div class="lbl subs" id="subs"></div>
-  </div>
-  <div class="side">
-    <h1>Оформление ролика</h1>
-    <p>Меняй настройки — превью справа обновляется сразу. Потом нажми «Сохранить».</p>
-    <button class="play" id="playIns">▶ Показать вставку фото</button>
+<header><h1 class="serif">Настройки монтажа</h1><button class="done" id="done">✓ Готово</button></header>
+
+<div class="stagewrap">
+  <div class="stage" id="stage">
+    <div class="phone" id="phone">
+      <div class="grade" id="grade"><div class="scene"></div>
+        <div class="fl" id="fl"><div class="scene"></div><div class="tint"></div><div class="vig"></div></div></div>
+      <div class="safe top">шапка Instagram</div>
+      <div class="safe bot">подпись и кнопки Instagram</div>
+      <div class="ins" id="ins"><div class="card"></div></div>
+      <div class="lbl title" id="title"><span></span></div>
+      <div class="emo" id="emo">👶</div>
+      <div class="lbl subs" id="subs"></div>
+    </div>
+    <button class="fs" id="fs" aria-label="Во весь экран"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f3ece8" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
   </div>
 </div>
 
-<main>
-  <section>
-    <h2>Субтитры</h2>
-    <div class="chips" id="sub_mode"></div>
-    <div class="row"><label>Размер <span id="v_sub_scale"></span></label><input type="range" id="sub_scale" min="0.6" max="1.8" step="0.05"></div>
-    <div class="row"><label>Положение по высоте <span id="v_sub_y"></span></label><input type="range" id="sub_y" min="0.3" max="0.9" step="0.01"></div>
-    <div class="row"><label>Шрифт</label><div class="chips" id="sub_font"></div></div>
-  </section>
+<div class="panel" id="panel"></div>
 
-  <section>
-    <h2>Цвет подсветки</h2>
-    <div class="chips" id="accent"></div>
-    <p class="hint">Им выделяются главное слово в субтитрах, заголовок и надписи.</p>
-  </section>
+<nav id="nav">
+  <button data-tab="presets"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg>Пресеты</button>
+  <button data-tab="subs"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 11h3M12 11h5M7 15h7M16 15h1"/></svg>Субтитры</button>
+  <button data-tab="title"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>Заголовок</button>
+  <button data-tab="filters"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>Фильтры</button>
+  <button data-tab="sound"><svg viewBox="0 0 24 24"><path d="M3 12h1M6 9v6M9 6v12M12 9v6M15 4v16M18 8v8M21 11v2"/></svg>Звук и темп</button>
+</nav>
 
-  <section>
-    <h2>Заголовок <button class="switch" id="title_sw" aria-label="Заголовок"></button></h2>
-    <div id="titleOpts">
-      <div class="row" style="margin-top:0"><label>Свой текст заголовка</label>
-        <input class="txt" id="hook" maxlength="90" placeholder="Пусто — придумаю сам по твоей речи"></div>
-      <div class="row"><label>Буквы</label><div class="chips" id="title_case"></div></div>
-      <div class="row"><label>Шрифт</label><div class="chips" id="title_font"></div></div>
-      <div class="tog">Печатать по буквам<button class="switch" data-k="title_typing"></button></div>
-      <div class="tog">Цветная плашка под текстом<button class="switch" data-k="title_fill"></button></div>
-      <div class="row"><label>Высота <span id="v_title_y"></span></label><input type="range" id="title_y" min="0.06" max="0.45" step="0.01"></div>
-      <div class="row"><label>Размер <span id="v_title_scale"></span></label><input type="range" id="title_scale" min="0.6" max="1.8" step="0.05"></div>
-      <div class="row"><label>Сколько держится <span id="v_title_hold"></span></label><input type="range" id="title_hold" min="2" max="12" step="0.5"></div>
-    </div>
-  </section>
-
-  <section>
-    <h2>Фото, гифки и стикеры</h2>
-    <div class="row" style="margin-top:0"><label>Как появляются</label><div class="chips" id="insert_anim"></div></div>
-    <div class="row"><label>Где показывать</label><div class="chips" id="insert_pos"></div></div>
-    <p class="hint">Это настройка по умолчанию — для каждого фото её можно поменять кнопками, когда пришлёшь файл.</p>
-  </section>
-
-  <section>
-    <h2>Фильтр</h2>
-    <div class="flts" id="filters"></div>
-    <div class="row" id="fstrRow"><label>Сила фильтра <span id="v_filter_strength"></span></label><input type="range" id="filter_strength" min="0.2" max="1" step="0.05"></div>
-  </section>
-
-  <section>
-    <h2>Картинка</h2>
-    <div class="row" style="margin-top:0"><label>Яркость <span id="v_brightness"></span></label><input type="range" id="brightness" min="-0.2" max="0.2" step="0.01"></div>
-    <div class="row"><label>Теплота <span id="v_warmth"></span></label><input type="range" id="warmth" min="-0.08" max="0.08" step="0.005"></div>
-    <div class="row"><label>Контраст <span id="v_contrast"></span></label><input type="range" id="contrast" min="0.8" max="1.4" step="0.01"></div>
-    <div class="tog">Чёрно-белое<button class="switch" data-k="bw"></button></div>
-    <div class="tog"><span>Сгладить кожу<small>лёгкая ретушь</small></span><button class="switch" data-k="retouch"></button></div>
-  </section>
-
-  <section>
-    <h2>Темп</h2>
-    <div class="row" style="margin-top:0"><label>Темп речи <span id="v_speed"></span></label>
-      <input type="range" id="speed" min="0.9" max="1.5" step="0.1">
-      <div class="scale"><span>×0,9</span><span>×1,5</span></div></div>
-    <div class="tog" style="border-top:0;margin-top:6px"><span>Плотный монтаж<small>насколько плотно вырезать паузы между фразами</small></span><button class="switch" data-k="dense"></button></div>
-    <div class="row" id="densRow" style="margin-top:4px"><input type="range" id="density" min="1" max="10" step="1">
-      <div class="scale"><span>Спокойный</span><span id="v_density"></span><span>Максимально динамичный</span></div></div>
-  </section>
-
-  <section>
-    <h2>Динамика и звук</h2>
-    <div class="tog"><span>Наезды камеры<small>на сильных фразах</small></span><button class="switch" data-k="zooms"></button></div>
-    <div class="tog"><span>Плашки на «во-первых…»</span><button class="switch" data-k="cards"></button></div>
-    <div class="tog"><span>Звуки<small>клавиатура, вуп, касса, свуш</small></span><button class="switch" data-k="sfx"></button></div>
-    <div class="tog">Фоновая музыка<button class="switch" data-k="music"></button></div>
-    <div class="tog"><span>Почистить звук от шума</span><button class="switch" data-k="denoise"></button></div>
-    <div class="row"><label>Громкость голоса <span id="v_volume_db"></span></label><input type="range" id="volume_db" min="-9" max="9" step="1"></div>
-  </section>
-</main>
-
-<button class="save" id="save">Сохранить</button>
+<div class="wiz" id="wiz"></div>
 
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
+const $ = id => document.getElementById(id);
+const haptic = () => { try{ tg && tg.HapticFeedback.selectionChanged(); }catch(e){} };
+
+// ---------- справочники (те же ключи, что в style.py) ----------
 const ACCENTS = {"кремовый":"#FFF0B8","жёлтый":"#FFD84D","розовый":"#FF9FD0","зелёный":"#8CF5A8","голубой":"#8FD8FF","белый":"#FFFFFF"};
-const MODES = {dynamic:"Динамичные",karaoke:"Слово за словом",fill:"Закраска",one:"Одно слово",none:"Без субтитров"};
+const LOOKS = {milk:["Молочный","#FFF0B8","Montserrat"],pink:["Розовый","#FF9FD0","Montserrat"],sky:["Голубое небо","#8FD8FF","Montserrat"],
+               mint:["Мятный","#8CF5A8","Unbounded"],classic:["Классика","#FFFFFF","Montserrat"],light:["Лайт","#FFFFFF","Caveat"]};
+const MINIMAL = {fill:"закраска",karaoke:"слово за словом",one:"одно слово",accent:"Акцент",brackets:"Скобки",contrast:"Контраст"};
+const FONTS = {Montserrat:"Montserrat",Unbounded:"Unbounded",Golos:"Golos",Manrope:"Manrope",Oswald:"Oswald",Caveat:"Рукописный"};
+const CSSFONT = {Montserrat:"Montserrat",Unbounded:"Unbounded",Golos:"'Golos Text'",Manrope:"Manrope",Oswald:"Oswald",Caveat:"Caveat"};
+const TCOLORS = ["#FFFFFF","#FFF6CF","#FFE37A","#F29AC0","#FFB08A","#8FCBEA","#CDB8F0","#A9E8D0","#E2C9A8","#111111","#E5A93B"];
+const TCNAMES = {"#FFFFFF":"Белый","#FFF6CF":"Сливочный","#FFE37A":"Жёлтый","#F29AC0":"Розовый","#FFB08A":"Персиковый","#8FCBEA":"Голубой",
+                 "#CDB8F0":"Лавандовый","#A9E8D0":"Мятный","#E2C9A8":"Бежевый","#111111":"Чёрный","#E5A93B":"Горчичный"};
+const FILTERS = {
+  none:{n:"без обработки",css:""},
+  cherry:{n:"черри",css:"saturate(1.15) contrast(1.04)",tint:["#ff4f7a","soft-light",.32]},
+  sunset:{n:"закат",css:"saturate(1.12) sepia(.12)",tint:["#ff8a3c","soft-light",.42]},
+  bwsoft:{n:"чёрно-белая",css:"grayscale(1) contrast(1.06)"},
+  soft:{n:"мягкая",css:"contrast(.88) brightness(1.06) saturate(.86)"},
+  summer:{n:"лето",css:"saturate(1.25) brightness(1.03)",tint:["#ffd36b","soft-light",.3]},
+  warm:{n:"тёплая",css:"sepia(.22) saturate(1.15)",tint:["#ff9a3c","soft-light",.35]},
+  cold:{n:"холодная",css:"saturate(.92)",tint:["#3c8cff","soft-light",.45]},
+  peach:{n:"персик",css:"brightness(1.04) saturate(1.05)",tint:["#ff9f87","soft-light",.5]},
+  vivid:{n:"сочная",css:"saturate(1.45) contrast(1.06)"},
+  matte:{n:"матовая",css:"contrast(.82) brightness(1.05) saturate(.9)"},
+  cinema:{n:"кино",css:"contrast(1.1) saturate(1.1)",tint:["#008a8a","soft-light",.35]},
+  film:{n:"плёнка",css:"contrast(.9) saturate(.78) sepia(.12)",tint:["#2f6f6a","soft-light",.25],vig:.45},
+  vintage:{n:"винтаж",css:"sepia(.45) contrast(.9) saturate(.85)",vig:.5},
+  noir:{n:"нуар",css:"grayscale(1) contrast(1.3) brightness(.96)",vig:.55},
+};
+const MOODS = {off:"Без музыки",any:"Любая",fun:"Весёлая",calm:"Спокойная",inspire:"Вдохновляющая"};
+const SOUNDS = {enhance:"Улучшить",original:"Как в исходнике",denoise:"Убрать шум",mute:"Без звука"};
+const SFX = {none:"без звуков",moderate:"умеренно",dense:"плотно"};
+const EMOJI = {off:"выключено",rarest:"редчайшие",rare:"редко",moderate:"умеренно"};
+const TANIM = {typing:"Печатается",fade:"Плавно",pop:"Выпрыгивает",none:"Сразу"};
 const ANIMS = {pop:"Выпрыгивание",slide:"Выезд сбоку",rise:"Всплытие",zoom:"Приближение",float:"Парение",spin:"С поворотом",polaroid:"Полароид",fade:"Плавно"};
 const POS = {top:"Сверху",center:"По центру",bottom:"Снизу",left:"Слева",right:"Справа",half:"Половина экрана",full:"Весь экран"};
-const FONTS = {Montserrat:"Montserrat",Oswald:"Oswald"};
-const TFONTS = {Montserrat:"Montserrat",Oswald:"Oswald",Caveat:"Рукописный"};
-const CASES = {lower:"строчные",upper:"ЗАГЛАВНЫЕ",as_is:"Как в речи"};
-// фильтры: те же, что в монтаже (style.py FILTERS); здесь — их приближение для превью
-const FILTERS = {
-  none:   {n:"Без фильтра", css:""},
-  warm:   {n:"Тёплый",  css:"sepia(.22) saturate(1.15)", tint:["#ff9a3c","soft-light",.35]},
-  cold:   {n:"Холодный",css:"saturate(.92)", tint:["#3c8cff","soft-light",.45]},
-  peach:  {n:"Персик",  css:"brightness(1.04) saturate(1.05)", tint:["#ff9f87","soft-light",.5]},
-  vivid:  {n:"Сочный",  css:"saturate(1.45) contrast(1.06)"},
-  soft:   {n:"Мягкий",  css:"contrast(.88) brightness(1.06) saturate(.86)"},
-  matte:  {n:"Матовый", css:"contrast(.82) brightness(1.05) saturate(.9)"},
-  cinema: {n:"Кино",    css:"contrast(1.1) saturate(1.1)", tint:["#008a8a","soft-light",.35]},
-  film:   {n:"Плёнка",  css:"contrast(.9) saturate(.78) sepia(.12)", tint:["#2f6f6a","soft-light",.25], vig:.45},
-  vintage:{n:"Винтаж",  css:"sepia(.45) contrast(.9) saturate(.85)", vig:.5},
-  noir:   {n:"Нуар",    css:"grayscale(1) contrast(1.3) brightness(.96)", vig:.55},
-};
-const DEF = {sub_mode:"dynamic",accent:"кремовый",sub_font:"Montserrat",sub_scale:1,sub_y:.74,title:true,title_case:"lower",
-  title_font:"Montserrat",title_fill:false,title_typing:true,title_y:.17,title_scale:1,title_hold:6,cards:true,insert_anim:"pop",
-  insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,bw:false,filter:"none",filter_strength:1,retouch:false,zooms:true,sfx:true,music:true,denoise:false,volume_db:0,dense:true,density:8};
+const DEF = {sub_mode:"dynamic",sub_look:"milk",accent:"#FFF0B8",accent_font:"auto",sub_font:"Montserrat",sub_scale:1,sub_y:.74,sub_pos:"auto",
+  plate:"shadow",phrase_bg:false,emoji:"off",censor_strong:false,cards:true,
+  title:true,title_case:"lower",title_font:"Montserrat",title_color:"accent",title_fill:false,title_anim:"typing",title_typing:true,
+  title_y:.17,title_scale:1,title_hold:6,insert_anim:"pop",insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,saturation:1.05,
+  bw:false,filter:"none",filter_strength:1,retouch:false,dense:true,density:8,zooms:true,sfx:true,sfx_level:"moderate",sfx_volume:70,
+  music:true,music_mood:"any",denoise:false,original_audio:false,mute:false,volume_db:0};
 
-// настройки приходят от бота в адресе: #s=<base64 json>&ctx=new|edit
+// ---------- данные от бота: #ctx=…&sp=…&s=<base64 json>&h=<заголовок>&f=<кадр> ----------
+function b64(v){ let b = (v || "").replace(/ /g, "+").replace(/-/g, "+").replace(/_/g, "/"); while (b.length % 4) b += "="; return b; }
 function readHash(){
   const h = new URLSearchParams(location.hash.slice(1));
-  let s = {};
-  try{
-    let b = (h.get("s") || "").replace(/ /g, "+").replace(/-/g, "+").replace(/_/g, "/");
-    while (b.length % 4) b += "=";
-    s = JSON.parse(decodeURIComponent(escape(atob(b))));
-  }catch(e){}
-  let hook = "";
-  try{
-    let b = (h.get("h") || "").replace(/-/g, "+").replace(/_/g, "/");
-    while (b.length % 4) b += "=";
-    if (b) hook = decodeURIComponent(escape(atob(b)));
-  }catch(e){}
-  let frame = (h.get("f") || "").replace(/-/g, "+").replace(/_/g, "/");
-  while (frame && frame.length % 4) frame += "=";
-  return {s, hook, frame, ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.2")};
+  let s = {}, hook = "";
+  try{ s = JSON.parse(decodeURIComponent(escape(atob(b64(h.get("s")))))); }catch(e){}
+  try{ if (h.get("h")) hook = decodeURIComponent(escape(atob(b64(h.get("h"))))); }catch(e){}
+  return {s, hook, frame: h.get("f") ? b64(h.get("f")) : "", ctx: h.get("ctx") || "new", speed: parseFloat(h.get("sp") || "1.2")};
 }
 const init = readHash();
 const st = Object.assign({}, DEF, init.s);
+if (!st.title_anim) st.title_anim = st.title_typing === false ? "fade" : "typing";
+if (ACCENTS[st.accent]) st.accent = ACCENTS[st.accent];
+if (!FILTERS[st.filter]) st.filter = "none";
 let speed = Math.min(1.5, Math.max(0.9, Math.round((init.speed || 1.2) * 10) / 10));
 let hook = init.hook || "";
-if (init.frame){                  // кадр из видео клиента вместо нарисованного силуэта
+let ownTitle = !!hook;
+let sound = st.mute ? "mute" : st.original_audio ? "original" : st.denoise ? "denoise" : "enhance";
+let mood = st.music ? (st.music_mood || "any") : "off";
+if (init.frame){
   document.documentElement.style.setProperty("--frame", `url("data:image/jpeg;base64,${init.frame}")`);
   document.body.classList.add("real");
 }
-if (!FILTERS[st.filter]) st.filter = "none";
-const $ = id => document.getElementById(id);
-const hex = () => ACCENTS[st.accent] || (String(st.accent).startsWith("#") ? st.accent : "#FFF0B8");
-const haptic = () => { try{ tg && tg.HapticFeedback.selectionChanged(); }catch(e){} };
-
-// ---------- элементы управления ----------
-function chips(id, opts, key, cb){
-  const box = $(id); box.innerHTML = "";
-  for (const [v, name] of Object.entries(opts)){
-    const b = document.createElement("button");
-    b.className = "chip" + (st[key] === v ? " on" : ""); b.textContent = name;
-    b.onclick = () => { st[key] = v; haptic(); chips(id, opts, key, cb); render(); cb && cb(); };
-    box.appendChild(b);
-  }
-}
-function applyFilter(layer, key, k){
-  const F = FILTERS[key] || FILTERS.none;
-  layer.style.filter = F.css || "none";
-  layer.style.opacity = key === "none" ? 0 : k;
-  const t = layer.querySelector(".tint"), v = layer.querySelector(".vig");
-  if (t){ if (F.tint){ t.style.background = F.tint[0]; t.style.mixBlendMode = F.tint[1]; t.style.opacity = F.tint[2]; }
-          else t.style.opacity = 0; }
-  if (v) v.style.opacity = F.vig || 0;
-}
-function filters(){
-  const box = $("filters"); box.innerHTML = "";
-  for (const [key, F] of Object.entries(FILTERS)){
-    const b = document.createElement("button");
-    b.className = "ft" + (st.filter === key ? " on" : "");
-    b.innerHTML = '<div class="th"><div class="scene"></div><div class="fl"><div class="scene"></div><div class="tint"></div><div class="vig"></div></div></div>' + F.n;
-    applyFilter(b.querySelector(".fl"), key, 1);
-    b.onclick = () => { st.filter = key; haptic(); filters(); render(); };
-    box.appendChild(b);
-  }
-  $("fstrRow").style.display = st.filter === "none" ? "none" : "";
-  const on = box.querySelector(".on");
-  if (on && on.scrollIntoViewIfNeeded) on.scrollIntoViewIfNeeded();
-}
-function swatches(){
-  const box = $("accent"); box.innerHTML = "";
-  for (const [n, c] of Object.entries(ACCENTS)){
-    const b = document.createElement("button");
-    b.className = "sw" + (st.accent === n ? " on" : ""); b.style.background = c; b.title = n;
-    b.onclick = () => { st.accent = n; haptic(); swatches(); render(); };
-    box.appendChild(b);
-  }
-  const c = document.createElement("label");
-  c.className = "sw custom" + (String(st.accent).startsWith("#") ? " on" : "");
-  c.innerHTML = '<input type="color" value="' + hex() + '">';
-  c.querySelector("input").oninput = e => { st.accent = e.target.value.toUpperCase(); swatches(); render(); };
-  box.appendChild(c);
-}
-const FMT = {
-  sub_scale: v => Math.round(v*100) + "%", title_scale: v => Math.round(v*100) + "%",
-  sub_y: v => Math.round(v*100) + "%", title_y: v => Math.round(v*100) + "%",
-  title_hold: v => v + " с", brightness: v => (v>0?"+":"") + Math.round(v*500) + "%",
-  warmth: v => (v>0?"+":"") + Math.round(v*1250) + "%", contrast: v => Math.round(v*100) + "%",
-  filter_strength: v => Math.round(v*100) + "%",
-  volume_db: v => (v>0?"+":"") + v + " дБ", speed: v => "×" + (+v).toFixed(1).replace(".", ","), density: v => String(Math.round(v))
-};
-function slider(id){
-  const el = $(id), isSpeed = id === "speed";
-  el.value = isSpeed ? speed : st[id];
-  const show = () => $("v_" + id).textContent = FMT[id](isSpeed ? speed : st[id]);
-  el.oninput = () => { const v = parseFloat(el.value); if (isSpeed) speed = v; else st[id] = v; show(); render(); };
-  show();
-}
-function switches(){
-  document.querySelectorAll(".switch[data-k]").forEach(b => {
-    const k = b.dataset.k; b.classList.toggle("on", !!st[k]);
-    b.onclick = () => { st[k] = !st[k]; haptic(); switches(); render(); };
-  });
-  const dr = $("densRow"); if (dr){ dr.style.opacity = st.dense ? 1 : .35; dr.style.pointerEvents = st.dense ? "" : "none"; }
-  const t = $("title_sw"); t.classList.toggle("on", !!st.title);
-  t.onclick = () => { st.title = !st.title; haptic(); switches(); render(); };
-  $("titleOpts").style.opacity = st.title ? 1 : .35;
-  $("titleOpts").style.pointerEvents = st.title ? "" : "none";
-}
+const accHex = () => String(st.accent).startsWith("#") ? st.accent : (ACCENTS[st.accent] || "#FFF0B8");
+const titleHex = () => st.title_color === "accent" ? accHex() : st.title_color;
+const afont = () => st.accent_font !== "auto" ? st.accent_font : (st.sub_mode === "dynamic" ? (LOOKS[st.sub_look] || LOOKS.milk)[2] : st.sub_font);
 
 // ---------- превью ----------
 const phone = $("phone");
-const K = () => phone.clientWidth / 1080;      // пиксели ролика → пиксели превью
+const K = () => phone.clientWidth / 1080;
 const PHRASE = "сегодня покажу как я монтирую рилсы за пять минут".split(" ");
 const BLOCKS = [[0,1,2,3],[4,5,6],[7,8]];
-const TITLE = "как я монтирую рилсы за пять минут";
+const TITLE = "Как я монтирую рилсы за пять минут";
 let tick = 0, typed = 0;
+
+function applyFilter(layer, key){
+  const F = FILTERS[key] || FILTERS.none;
+  layer.style.filter = F.css || "none";
+  layer.style.opacity = key === "none" ? 0 : (st.filter_strength || 1);
+  const t = layer.querySelector(".tint"), v = layer.querySelector(".vig");
+  if (t){ if (F.tint){ t.style.background = F.tint[0]; t.style.mixBlendMode = F.tint[1]; t.style.opacity = F.tint[2]; } else t.style.opacity = 0; }
+  if (v) v.style.opacity = F.vig || 0;
+}
+function subY(){ return st.sub_pos === "top" ? .30 : st.sub_y; }
 
 function render(){
   const k = K();
-  document.documentElement.style.setProperty("--accent", hex());
-  // картинка
-  const f = [`brightness(${1 + st.brightness*2.2})`, `contrast(${st.contrast})`,
-             `saturate(${st.bw ? 0 : 1.05})`, st.warmth > 0 ? `sepia(${st.warmth*5})` : `hue-rotate(${st.warmth*300}deg)`];
+  document.documentElement.style.setProperty("--accent", accHex());
+  const f = [`brightness(${1 + st.brightness * 2.2})`, `contrast(${st.contrast})`, st.warmth > 0 ? `sepia(${st.warmth * 5})` : `hue-rotate(${st.warmth * 300}deg)`];
   if (st.retouch) f.push("blur(.25px)");
   $("grade").style.filter = f.join(" ");
-  applyFilter($("fl"), st.filter, st.filter_strength);
+  applyFilter($("fl"), st.filter);
   // заголовок
-  const t = $("title");
-  t.style.display = st.title ? "" : "none";
+  const t = $("title"), on = st.title;
+  t.style.display = on ? "" : "none";
   t.style.top = (st.title_y * 100) + "%";
   t.style.fontSize = (64 * st.title_scale * k) + "px";
-  t.style.fontFamily = st.title_font;
-  t.style.fontWeight = st.title_font === "Caveat" ? 600 : 700;
-  t.style.color = st.title_fill ? "#151515" : hex();
+  const tf = st.title_font === "subs" ? st.sub_font : st.title_font;
+  t.style.fontFamily = CSSFONT[tf] || tf;
+  t.style.fontWeight = tf === "Caveat" ? 700 : 700;
   t.classList.toggle("fill", !!st.title_fill);
-  const base = hook.trim() || "Как я монтирую рилсы за пять минут";
-  let txt = st.title_case === "upper" ? base.toUpperCase() : st.title_case === "lower" ? base.toLowerCase() : base;
-  t.firstChild.textContent = st.title_typing ? txt.slice(0, typed) : txt;
+  const sp = t.firstChild;
+  sp.style.background = st.title_fill ? titleHex() : "none";
+  sp.style.color = st.title_fill ? "#151515" : titleHex();
+  const base = (ownTitle && hook.trim()) || TITLE;
+  const txt = st.title_case === "upper" ? base.toUpperCase() : st.title_case === "lower" ? base.toLowerCase() : base;
+  sp.textContent = st.title_anim === "typing" ? txt.slice(0, typed) : txt;
   renderSubs();
+  // смайлик
+  const e = $("emo");
+  e.style.display = st.emoji !== "off" && st.sub_mode !== "none" ? "" : "none";
+  e.style.top = ((subY() - (st.sub_mode === "dynamic" ? .1 : .07)) * 100) + "%";
 }
 
 function renderSubs(){
-  const k = K(), box = $("subs"), sc = st.sub_scale;
-  box.style.display = st.sub_mode === "none" ? "none" : "";
-  box.style.top = (st.sub_y * 100) + "%";
+  const k = K(), box = $("subs"), sc = st.sub_scale, m = st.sub_mode;
+  box.style.display = m === "none" ? "none" : "";
+  box.style.top = (subY() * 100) + "%";
   box.style.transform = "translateY(-50%)";
-  box.style.fontFamily = st.sub_font;
-  box.className = "lbl subs" + (st.sub_mode === "fill" ? " fill" : "");
+  box.style.fontFamily = CSSFONT[st.sub_font] || st.sub_font;
+  box.className = "lbl subs pl-" + (m === "contrast" ? "x" : st.plate) + (m === "contrast" ? " contrast" : "");
   const b = BLOCKS[Math.floor(tick / 5) % BLOCKS.length];
-  const shown = Math.min(tick % 5, b.length - 1);   // сколько слов блока уже прозвучало
-  const w = (i, cls = "") => `<span class="w ${cls}">${PHRASE[i]}</span>`;
-  if (st.sub_mode === "dynamic"){
-    const big = b.reduce((a, i) => PHRASE[i].length > PHRASE[a].length ? i : a, b[0]);
+  const shown = Math.min(tick % 5, b.length - 1);
+  const big = b.reduce((a, i) => PHRASE[i].length > PHRASE[a].length ? i : a, b[0]);
+  const A = accHex(), AF = CSSFONT[afont()] || afont();
+  const w = (i, style = "", cls = "") => `<span class="w ${cls}" style="${style}">${PHRASE[i]}</span>`;
+  let html = "";
+  if (m === "dynamic"){
     const pre = b.filter(i => i < big), post = b.filter(i => i > big);
     const vis = i => b.indexOf(i) <= shown ? "" : "off";
-    box.innerHTML =
-      (pre.length ? `<div class="small" style="font-size:${46*sc*k}px">${pre.map(i => w(i, vis(i))).join(" ")}</div>` : "") +
-      `<div class="big" style="font-size:${92*sc*k}px">${w(big, vis(big))}</div>` +
-      (post.length ? `<div class="small" style="font-size:${46*sc*k}px">${post.map(i => w(i, vis(i))).join(" ")}</div>` : "");
-  } else if (st.sub_mode === "one"){
-    const i = b[Math.min(shown, b.length - 1)];
-    box.innerHTML = `<span class="w" style="font-weight:800;font-size:${104*sc*k}px;color:${PHRASE[i].length >= 6 ? hex() : "#fff"}">${PHRASE[i]}</span>`;
+    const small = i => w(i, "font-weight:600;color:#fff", vis(i));
+    html = (pre.length ? `<span class="line" style="font-size:${46*sc*k}px">${pre.map(small).join(" ")}</span>` : "") +
+      `<span class="line" style="font-size:${92*sc*k}px">${w(big, `font-weight:800;color:${A};font-family:${AF}`, vis(big))}</span>` +
+      (post.length ? `<span class="line" style="font-size:${46*sc*k}px">${post.map(small).join(" ")}</span>` : "");
+  } else if (m === "one"){
+    const i = b[shown];
+    const acc = PHRASE[i].length >= 6;
+    html = `<span class="line" style="font-size:${104*sc*k}px">${w(i, `font-weight:800;color:${acc ? A : "#fff"};font-family:${acc ? AF : "inherit"}`)}</span>`;
   } else {
-    const fill = st.sub_mode === "fill";
-    box.innerHTML = `<div style="font-weight:700;font-size:${62*sc*k}px;color:#fff">` + b.map((i, j) => {
-      if (fill) return w(i, j === Math.min(shown, b.length - 1) ? "cur" : "");
-      if (j > shown) return w(i, "off");
-      return j === shown ? `<span class="w" style="color:${hex()}">${PHRASE[i]}</span>` : w(i);
-    }).join(" ") + "</div>";
+    const parts = b.map((i, j) => {
+      const cur = j === shown;
+      if (m === "fill") return w(i, cur ? `background:${A};color:#151515;border-radius:.18em;padding:0 .15em;text-shadow:none` : "color:#fff");
+      if (m === "karaoke") return j > shown ? w(i, "", "off") : w(i, `color:${cur ? A : "#fff"}`);
+      if (m === "accent") return w(i, cur ? `color:${A};font-family:${AF};font-weight:800;transform:scale(1.12)` : "color:#fff");
+      if (m === "brackets") return i === big ? `<span class="w" style="color:${A};font-family:${AF};font-weight:800">[${PHRASE[i]}]</span>` : w(i, "color:#fff");
+      if (m === "contrast") return w(i, `color:${cur ? "#C2410C" : "#151515"}`);
+      return w(i);
+    }).join(" ");
+    html = `<span class="line" style="font-weight:700;font-size:${62*sc*k}px">${parts}</span>`;
   }
+  box.innerHTML = st.phrase_bg && m !== "contrast" ? `<span class="phrasebg">${html}</span>` : html;
 }
 
-// вставка фото: та же анимация и место, что в ролике
+// вставка фото в превью
 const LAYOUT = {top:[540,700,760,560],center:[540,930,820,620],bottom:[540,1130,720,520],left:[300,640,440,440],
                 right:[780,640,440,440],half:[540,480,1080,960],full:[540,960,1080,1920]};
 function playInsert(){
   const el = $("ins"), k = K();
   const [cx, cy, w, h] = LAYOUT[st.insert_pos] || LAYOUT.top;
-  const ww = st.insert_pos === "left" || st.insert_pos === "right" ? 400 : w;
-  const hh = st.insert_pos === "left" || st.insert_pos === "right" ? 400 : h;
   el.className = "ins " + st.insert_pos + (st.insert_anim === "polaroid" ? " polaroid" : "");
-  Object.assign(el.style, {left: (cx - ww/2)*k + "px", top: (cy - hh/2)*k + "px", width: ww*k + "px", height: hh*k + "px",
-    animation: "none"});
+  Object.assign(el.style, {left: (cx - w/2)*k + "px", top: (cy - h/2)*k + "px", width: w*k + "px", height: h*k + "px", animation: "none"});
   void el.offsetWidth;
   const name = st.insert_anim === "slide" && st.insert_pos === "right" ? "a-slideR" : "a-" + st.insert_anim;
   el.style.animation = `${name} 2.6s cubic-bezier(.2,.8,.2,1) both`;
 }
-$("playIns").onclick = () => { haptic(); playInsert(); };
+
+// ---------- элементы управления ----------
+function h(html){ const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
+function chips(opts, get, set, extraCls = ""){
+  const box = h(`<div class="chips ${extraCls}"></div>`);
+  for (const [v, name] of Object.entries(opts)){
+    const b = h(`<button class="chip">${name}</button>`);
+    if (get() === v) b.classList.add("on");
+    b.onclick = () => { set(v); haptic(); refresh(); };
+    box.appendChild(b);
+  }
+  return box;
+}
+function seg(opts, get, set){
+  const box = h(`<div class="seg"></div>`);
+  for (const [v, name] of Object.entries(opts)){
+    const b = h(`<button>${name}</button>`);
+    if (get() === v) b.classList.add("on");
+    b.onclick = () => { set(v); haptic(); refresh(); };
+    box.appendChild(b);
+  }
+  return box;
+}
+function pills(opts, get, set){
+  const box = h(`<div class="pills"></div>`);
+  for (const [v, name] of Object.entries(opts)){
+    const b = h(`<button>${name}</button>`);
+    if (get() === v) b.classList.add("on");
+    b.onclick = () => { set(v); haptic(); refresh(); };
+    box.appendChild(b);
+  }
+  return box;
+}
+function toggle(label, get, set, note = ""){
+  const r = h(`<div class="tog"><span>${label}${note ? `<small>${note}</small>` : ""}</span><button class="sw"></button></div>`);
+  const b = r.querySelector(".sw"); b.classList.toggle("on", !!get());
+  b.onclick = () => { set(!get()); haptic(); refresh(); };
+  return r;
+}
+function slider(label, min, max, step, get, set, fmt, scale){
+  const r = h(`<div class="row"><div class="lab">${label}<b></b></div><input type="range" min="${min}" max="${max}" step="${step}"></div>`);
+  const inp = r.querySelector("input"), out = r.querySelector("b");
+  const show = () => { out.textContent = fmt ? fmt(get()) : ""; inp.style.setProperty("--p", ((get() - min) / (max - min) * 100) + "%"); };
+  inp.value = get(); show();
+  inp.oninput = () => { set(parseFloat(inp.value)); show(); render(); };
+  if (scale) r.appendChild(h(`<div class="scale">${scale.map(s => `<span>${s}</span>`).join("")}</div>`));
+  return r;
+}
+function row(label, el){ const r = h(`<div class="row"><div class="lab">${label}</div></div>`); r.appendChild(el); return r; }
+function rowh(label, el){ const r = h(`<div class="row rowh"><span class="t">${label}</span></div>`); r.appendChild(el); return r; }
+
+// карточки стилей субтитров
+function subCards(){
+  const box = h(`<div class="cards"></div>`);
+  if (st.sub_mode === "dynamic"){
+    for (const [key, [name, color, font]] of Object.entries(LOOKS)){
+      const c = h(`<button class="scard"><div class="sm" style="color:${color};font-family:${CSSFONT[font]};font-weight:800${font === "Caveat" ? ";font-size:22px" : ""}">монтаж</div><div class="nm">${name}</div></button>`);
+      if (st.sub_look === key) c.classList.add("on");
+      c.onclick = () => { st.sub_look = key; st.accent = color; haptic(); refresh(); };
+      box.appendChild(c);
+    }
+  } else {
+    const demo = {
+      fill: `<span style="background:#fff;color:#111;border-radius:3px;padding:0 3px">монтаж</span>&nbsp;<span style="color:#ccc">без</span>`,
+      karaoke: `<span style="color:#fff">монтаж</span>&nbsp;<span style="color:#fff">без</span>`,
+      one: `<span style="color:#fff;font-weight:800">лишних</span>`,
+      accent: `<span style="color:#fff">монтаж</span>`,
+      brackets: `<span style="color:#fff;font-style:italic;font-family:'Cormorant Garamond';font-weight:700">монтаж</span>`,
+      contrast: `<span style="background:#fff;color:#111;font-weight:800;padding:0 4px">монтаж</span>`};
+    for (const [key, name] of Object.entries(MINIMAL)){
+      const c = h(`<button class="scard"><div class="sm" style="font-weight:600">${demo[key]}</div><div class="nm">${name}</div></button>`);
+      if (st.sub_mode === key) c.classList.add("on");
+      c.onclick = () => { st.sub_mode = key; haptic(); refresh(); };
+      box.appendChild(c);
+    }
+  }
+  return box;
+}
+function family(){ return st.sub_mode === "dynamic" ? "anim" : "min"; }
+function familySeg(){
+  return seg({anim: "Анимированные", min: "Минимализм"}, family, v => {
+    if (v === "anim"){ st.sub_mode = "dynamic"; st.accent = (LOOKS[st.sub_look] || LOOKS.milk)[1]; }
+    else if (st.sub_mode === "dynamic" || st.sub_mode === "none") st.sub_mode = "fill";
+  });
+}
+function sizeRow(){
+  if (st.sub_mode === "dynamic")
+    return h(`<div class="sub">Размер этого вида задаёт анимация, а не ползунок.</div>`);
+  return slider("Размер субтитров", .6, 1.8, .05, () => st.sub_scale, v => st.sub_scale = v, v => Math.round(v * 100) + "%");
+}
+function posPills(){ return pills({bottom: "Снизу", top: "Сверху"}, () => st.sub_pos === "top" ? "top" : "bottom", v => st.sub_pos = v); }
+function fontChips(withAuto, get, set, autoName = "Как у вида"){
+  const o = withAuto ? Object.assign({auto: autoName}, FONTS) : FONTS;
+  const box = chips(o, get, set);
+  [...box.children].forEach((b, i) => { const key = Object.keys(o)[i]; if (key !== "auto" && key !== "subs") { b.style.fontFamily = CSSFONT[key]; b.style.fontWeight = 700; } });
+  return box;
+}
+function titleColors(){
+  const box = h(`<div class="dots"></div>`);
+  const acc = h(`<button class="dot" title="как подсветка" style="background:${accHex()}"></button>`);
+  if (st.title_color === "accent") acc.classList.add("on");
+  acc.onclick = () => { st.title_color = "accent"; haptic(); refresh(); };
+  box.appendChild(acc);
+  for (const c of TCOLORS){
+    const d = h(`<button class="dot" style="background:${c}"></button>`);
+    if (String(st.title_color).toUpperCase() === c) d.classList.add("on");
+    d.onclick = () => { st.title_color = c; haptic(); refresh(); };
+    box.appendChild(d);
+  }
+  const all = h(`<label class="dot all" style="display:grid;place-items:center">Все<input type="color" value="${titleHex()}"></label>`);
+  all.querySelector("input").oninput = e => { st.title_color = e.target.value.toUpperCase(); refresh(); };
+  box.appendChild(all);
+  return box;
+}
+function accentDots(){
+  const box = h(`<div class="dots"></div>`);
+  for (const [n, c] of Object.entries(ACCENTS)){
+    const d = h(`<button class="dot" title="${n}" style="background:${c}"></button>`);
+    if (accHex().toUpperCase() === c) d.classList.add("on");
+    d.onclick = () => { st.accent = c; haptic(); refresh(); };
+    box.appendChild(d);
+  }
+  const all = h(`<label class="dot all" style="display:grid;place-items:center">Все<input type="color" value="${accHex()}"></label>`);
+  all.querySelector("input").oninput = e => { st.accent = e.target.value.toUpperCase(); refresh(); };
+  box.appendChild(all);
+  return box;
+}
+function filterTiles(){
+  const box = h(`<div class="cards"></div>`);
+  for (const [key, F] of Object.entries(FILTERS)){
+    const b = h(`<button class="ft"><div class="th"><div class="scene"></div><div class="fl"><div class="scene"></div><div class="tint"></div><div class="vig"></div></div><div class="nm">${F.n}</div></div></button>`);
+    const fl = b.querySelector(".fl"); const keep = st.filter_strength; st.filter_strength = 1; applyFilter(fl, key); st.filter_strength = keep;
+    if (st.filter === key) b.classList.add("on");
+    b.onclick = () => { st.filter = key; haptic(); refresh(); };
+    box.appendChild(b);
+  }
+  return box;
+}
+function titleTextBlock(){
+  const wrap = h(`<div></div>`);
+  wrap.appendChild(toggle("Заголовок в начале ролика", () => st.title, v => st.title = v));
+  if (st.title){
+    wrap.appendChild(chips({own: "Свой текст", auto: "Придумай сама"}, () => ownTitle ? "own" : "auto", v => { ownTitle = v === "own"; }, "wrap"));
+    if (ownTitle){
+      const ta = h(`<textarea class="txt" maxlength="120" placeholder="Например: я уже решила, в 2 года мой ребёнок в сад не пойдёт" style="margin-top:12px"></textarea>`);
+      ta.value = hook;
+      ta.oninput = () => { hook = ta.value; typed = 999; render(); };
+      wrap.appendChild(ta);
+    } else {
+      wrap.appendChild(h(`<div class="sub" style="margin-top:10px">Заголовок придумаю по твоей речи.</div>`));
+    }
+  }
+  return wrap;
+}
+function tempoBlock(){
+  const w = h(`<div></div>`);
+  w.appendChild(slider("Темп речи", .9, 1.5, .1, () => speed, v => speed = Math.round(v * 10) / 10, v => "×" + (+v).toFixed(1).replace(".", ","), ["×0,9", "×1,5"]));
+  w.appendChild(toggle("Плотный монтаж", () => st.dense, v => st.dense = v, "насколько плотно вырезать паузы между фразами"));
+  if (st.dense) w.appendChild(slider("Насколько плотно", 1, 10, 1, () => st.density, v => st.density = Math.round(v), v => Math.round(v) + " из 10", ["Спокойный", "Максимально динамичный"]));
+  return w;
+}
+function musicChips(){
+  return chips(MOODS, () => mood, v => { mood = v; st.music = v !== "off"; if (v !== "off") st.music_mood = v; });
+}
+
+// ---------- вкладки ----------
+let tab = "subs", subpage = "", titleSeg = "text", soundSeg = "music";
+const PANELS = {
+  presets(p){
+    p.appendChild(h(`<div class="ph"><h2 class="serif">Пресеты</h2></div>`));
+    p.appendChild(h(`<div class="lab">Сохранить оформление</div>`));
+    const add = h(`<button class="chip" style="width:100%;padding:14px">+ Сохранить текущее</button>`);
+    add.onclick = () => { presetForm = true; refresh(); };
+    p.appendChild(add);
+    if (presetForm){
+      const f = h(`<div style="display:flex;gap:8px;margin-top:10px"><input class="txt" style="min-height:0;padding:11px" maxlength="30" placeholder="Название, например «Для блога»"><button class="done" style="padding:10px 16px">ОК</button></div>`);
+      const inp = f.querySelector("input");
+      f.querySelector("button").onclick = () => { savePreset(inp.value.trim() || ("Пресет " + (presets.length + 1))); presetForm = false; refresh(); };
+      p.appendChild(f); setTimeout(() => inp.focus(), 50);
+    }
+    if (presets.length){
+      p.appendChild(h(`<div class="lab" style="margin-top:20px">Мои пресеты</div>`));
+      presets.forEach((pr, i) => {
+        const r = h(`<div class="preset"><button class="chip">${pr.name.replace(/</g, "&lt;")}</button><button class="x" aria-label="Удалить">✕</button></div>`);
+        r.querySelector(".chip").onclick = () => { Object.assign(st, pr.style); speed = pr.speed || speed;
+          sound = pr.sound || sound; mood = pr.mood || mood; haptic(); refresh(); toast("Применила «" + pr.name + "»"); };
+        r.querySelector(".x").onclick = () => { presets.splice(i, 1); storePresets(); refresh(); };
+        p.appendChild(r);
+      });
+    } else p.appendChild(h(`<div class="sub" style="margin-top:12px">Сохрани оформление, чтобы применять его к следующим роликам в один тап.</div>`));
+    const reset = h(`<button class="btn ghost">Сбросить к стандартному</button>`);
+    reset.onclick = () => { Object.assign(st, DEF); speed = 1.2; sound = "enhance"; mood = "any"; refresh(); };
+    p.appendChild(reset);
+  },
+  subs(p){
+    if (subpage === "more") return moreSubs(p);
+    const hd = h(`<div class="ph"><h2 class="serif">Субтитры</h2><button class="link">Ещё настройки ›</button></div>`);
+    hd.querySelector("button").onclick = () => { subpage = "more"; refresh(); };
+    p.appendChild(hd);
+    if (st.sub_mode === "none") p.appendChild(h(`<div class="sub" style="margin-bottom:10px">Субтитры выключены — включи в «Ещё настройки».</div>`));
+    p.appendChild(familySeg());
+    p.appendChild(subCards());
+    p.appendChild(rowh("Положение", posPills()));
+    p.appendChild(sizeRow());
+    p.appendChild(row("Шрифт акцентного слова", fontChips(true, () => st.accent_font, v => st.accent_font = v)));
+  },
+  title(p){
+    p.appendChild(h(`<div class="ph"><h2 class="serif">Заголовок</h2></div>`));
+    p.appendChild(seg({text: "Текст", look: "Вид", color: "Цвет"}, () => titleSeg, v => titleSeg = v));
+    if (titleSeg === "text") p.appendChild(titleTextBlock());
+    if (titleSeg === "look"){
+      p.appendChild(row("Шрифт заголовка", fontChips(true, () => st.title_font === "subs" ? "auto" : st.title_font, v => st.title_font = v === "auto" ? "subs" : v, "Как у субтитров")));
+      p.appendChild(toggle("Заливка под заголовком", () => st.title_fill, v => st.title_fill = v));
+      p.appendChild(toggle("Заглавные буквы", () => st.title_case === "upper", v => st.title_case = v ? "upper" : "lower"));
+      p.appendChild(row("Как заголовок появляется", chips(TANIM, () => st.title_anim, v => { st.title_anim = v; st.title_typing = v === "typing"; typed = 0; })));
+      p.appendChild(slider("Высота", .06, .45, .01, () => st.title_y, v => st.title_y = v, v => Math.round(v * 100) + "%"));
+      p.appendChild(slider("Размер", .6, 1.8, .05, () => st.title_scale, v => st.title_scale = v, v => Math.round(v * 100) + "%"));
+      p.appendChild(slider("Сколько держится", 2, 12, .5, () => st.title_hold, v => st.title_hold = v, v => String(v).replace(".", ",") + " с"));
+    }
+    if (titleSeg === "color"){
+      const c = String(st.title_color).toUpperCase();
+      const name = st.title_color === "accent" ? "Как подсветка" : (TCNAMES[c] || "Свой") + (c === "#FFFFFF" ? " — как было" : "");
+      p.appendChild(h(`<div class="lab">Цвет букв заголовка<b>${name}</b></div>`));
+      p.appendChild(titleColors());
+    }
+  },
+  filters(p){
+    p.appendChild(h(`<div class="ph"><h2 class="serif">Фильтры</h2></div>`));
+    p.appendChild(filterTiles());
+    p.appendChild(slider("Яркость", -.2, .2, .01, () => st.brightness, v => st.brightness = v, null, ["темнее", "как снято", "светлее"]));
+    p.appendChild(toggle("Мягче кожа", () => st.retouch, v => st.retouch = v));
+  },
+  sound(p){
+    p.appendChild(h(`<div class="ph"><h2 class="serif">Звук и темп</h2></div>`));
+    p.appendChild(seg({music: "Музыка", sound: "Звук", tempo: "Темп"}, () => soundSeg, v => soundSeg = v));
+    if (soundSeg === "music"){
+      p.appendChild(musicChips());
+      p.appendChild(h(`<div class="sub" style="margin-top:10px">Музыка приглушается, пока ты говоришь.</div>`));
+    }
+    if (soundSeg === "sound"){
+      p.appendChild(chips(SOUNDS, () => sound, v => sound = v));
+      if (sound !== "mute") p.appendChild(slider("", -9, 9, 1, () => st.volume_db, v => st.volume_db = v, null, ["тише", "как обычно", "громче"]));
+      p.appendChild(row("Звуки в монтаже", seg(SFX, () => st.sfx ? st.sfx_level : "none", v => { st.sfx_level = v; st.sfx = v !== "none"; })));
+      if (st.sfx && st.sfx_level !== "none")
+        p.appendChild(slider("Громкость звуковых эффектов", 0, 100, 5, () => st.sfx_volume, v => st.sfx_volume = v, v => Math.round(v) + " %"));
+    }
+    if (soundSeg === "tempo"){
+      p.appendChild(tempoBlock());
+      p.appendChild(h(`<hr>`));
+      p.appendChild(toggle("Наезды камеры", () => st.zooms, v => st.zooms = v, "на сильных фразах"));
+      p.appendChild(row("Как появляются фото и гифки", chips(ANIMS, () => st.insert_anim, v => { st.insert_anim = v; setTimeout(playInsert, 30); })));
+      p.appendChild(row("Где их показывать", chips(POS, () => st.insert_pos, v => { st.insert_pos = v; setTimeout(playInsert, 30); })));
+    }
+  },
+};
+function moreSubs(p){
+  const hd = h(`<div class="ph"><h2 class="serif"><button class="back">‹</button>Ещё настройки</h2></div>`);
+  hd.querySelector("button").onclick = () => { subpage = ""; refresh(); };
+  p.appendChild(hd);
+  p.appendChild(toggle("Субтитры в ролике", () => st.sub_mode !== "none", v => { st.sub_mode = v ? (st._prev_mode || "dynamic") : (st._prev_mode = st.sub_mode, "none"); }));
+  p.appendChild(toggle("Усиленная цензура", () => st.censor_strong, v => st.censor_strong = v, "мат — звёздочками и «пиком»"));
+  p.appendChild(row("Положение субтитров", seg({auto: "Авто", bottom: "Снизу", top: "Сверху"}, () => st.sub_pos, v => st.sub_pos = v)));
+  if (st.sub_pos !== "top") p.appendChild(slider("Высота субтитров", .3, .9, .01, () => st.sub_y, v => st.sub_y = v, v => Math.round(v * 100) + "%"));
+  p.appendChild(row("Смайлики в субтитрах", chips(EMOJI, () => st.emoji, v => st.emoji = v)));
+  p.appendChild(row("✨ Шрифт субтитров", fontChips(false, () => st.sub_font, v => st.sub_font = v)));
+  p.appendChild(row("Подложка под буквами", seg({shadow: "Тень", box: "Заливка", none: "Ничего"}, () => st.plate, v => st.plate = v)));
+  p.appendChild(toggle("Фон под каждой фразой", () => st.phrase_bg, v => st.phrase_bg = v));
+  p.appendChild(toggle("Карточки-тезисы", () => st.cards, v => st.cards = v, "плашки на «во-первых, во-вторых…»"));
+  p.appendChild(row("Цвет подсветки", accentDots()));
+}
+
+function refresh(){
+  const p = $("panel"); p.innerHTML = "";
+  PANELS[tab](p);
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  render();
+  if (tg && tg.BackButton){ (tab === "subs" && subpage) ? tg.BackButton.show() : tg.BackButton.hide(); }
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { tab = b.dataset.tab; subpage = ""; haptic(); refresh(); window.scrollTo({top: 0}); });
+$("fs").onclick = () => { $("stage").classList.toggle("big"); setTimeout(render, 320); };
+
+// ---------- пресеты: облако Telegram (если есть) + память браузера ----------
+let presets = [], presetForm = false;
+function storePresets(){
+  const v = JSON.stringify(presets.slice(0, 12));
+  try{ localStorage.setItem("reels_presets", v); }catch(e){}
+  try{ tg && tg.CloudStorage && tg.CloudStorage.setItem("presets", v); }catch(e){}
+}
+function savePreset(name){
+  const style = Object.assign({}, st); delete style._prev_mode;
+  presets.unshift({name, style, speed, sound, mood}); storePresets(); toast("Сохранила «" + name + "»");
+}
+try{ presets = JSON.parse(localStorage.getItem("reels_presets") || "[]"); }catch(e){}
+try{ tg && tg.CloudStorage && tg.CloudStorage.getItem("presets", (err, v) => { if (!err && v){ try{ presets = JSON.parse(v); if (tab === "presets") refresh(); }catch(e){} } }); }catch(e){}
+function toast(t){ try{ tg && tg.showPopup ? tg.showPopup({message: t}) : null; }catch(e){} }
+
+// ---------- мастер при первом открытии ----------
+const STEPS = [
+  {t: "Выберите стиль субтитров", next: "Дальше · заголовок", body(w){ w.appendChild(familySeg()); w.appendChild(subCards()); w.appendChild(rowh("Положение", posPills())); w.appendChild(sizeRow()); }},
+  {t: "Заголовок", next: "Дальше · фильтр", body(w){ w.appendChild(titleTextBlock()); if (st.title) { w.appendChild(h(`<div class="lab" style="margin-top:14px">Цвет</div>`)); w.appendChild(titleColors()); } }},
+  {t: "Фильтр", next: "Дальше · звук и темп", body(w){ w.appendChild(filterTiles()); w.appendChild(slider("Яркость", -.2, .2, .01, () => st.brightness, v => st.brightness = v, null, ["темнее", "как снято", "светлее"])); }},
+  {t: "Музыка и темп", next: "Готово", body(w){ w.appendChild(row("Музыка", musicChips())); w.appendChild(tempoBlock()); }},
+];
+let step = -1;
+function wizard(){
+  const W = $("wiz");
+  if (step < 0){ W.classList.remove("show"); refresh(); return; }
+  const S = STEPS[step];
+  W.innerHTML = "";
+  W.appendChild(h(`<div class="prog">${STEPS.map((_, i) => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>`));
+  W.appendChild(h(`<h2 class="serif">${S.t}</h2>`));
+  W.appendChild(phone);                      // то же живое превью
+  const body = h(`<div></div>`); S.body(body); W.appendChild(body);
+  const nx = h(`<button class="btn">${S.next}</button>`);
+  nx.onclick = () => { haptic(); if (step === STEPS.length - 1){ finishWizard(); save(); } else { step++; wizard(); } };
+  W.appendChild(nx);
+  const adv = h(`<button class="btn ghost" style="background:none;color:var(--acc);margin-top:6px">Продвинутые настройки</button>`);
+  adv.onclick = () => finishWizard();
+  W.appendChild(adv);
+  W.classList.add("show"); W.scrollTop = 0;
+  render();
+}
+function finishWizard(){
+  try{ localStorage.setItem("reels_wizard_done", "1"); }catch(e){}
+  step = -1; $("stage").insertBefore(phone, $("fs")); wizard();
+}
+// перерисовка шагов мастера при изменении настроек
+const _refresh = refresh;
+refresh = function(){ if (step >= 0) wizard(); else _refresh(); };
 
 // ---------- сохранение ----------
 function save(){
-  const out = {v: 1, ctx: init.ctx, style: st, speed: speed, hook: hook.trim()};
+  const style = Object.assign({}, st); delete style._prev_mode;
+  style.sound = sound;
+  style.mute = sound === "mute"; style.original_audio = sound === "original"; style.denoise = sound === "denoise";
+  style.music = mood !== "off"; if (mood !== "off") style.music_mood = mood;
+  style.title_typing = style.title_anim === "typing";
+  const out = {v: 2, ctx: init.ctx, style, speed, hook: ownTitle ? hook.trim() : ""};
   const data = JSON.stringify(out);
-  if (tg && tg.sendData && tg.initData !== undefined && tg.platform !== "unknown"){
-    tg.sendData(data);              // бот получит настройки и продолжит
-  } else {
-    alert("Настройки:\n" + data);   // открыто не в Telegram — просто показываем
-  }
+  if (tg && tg.sendData && tg.initData !== undefined && tg.platform !== "unknown") tg.sendData(data);
+  else alert("Настройки:\n" + data);
 }
+$("done").onclick = () => { haptic(); save(); };
 
 // ---------- запуск ----------
-chips("sub_mode", MODES, "sub_mode");
-chips("sub_font", FONTS, "sub_font");
-chips("title_case", CASES, "title_case");
-chips("title_font", TFONTS, "title_font");
-chips("insert_anim", ANIMS, "insert_anim", playInsert);
-chips("insert_pos", POS, "insert_pos", playInsert);
-swatches(); switches(); filters();
-$("hook").value = hook;
-$("hook").oninput = e => { hook = e.target.value; typed = 999; render(); };
-["sub_scale","sub_y","title_y","title_scale","title_hold","filter_strength","brightness","warmth","contrast","volume_db","speed","density"].forEach(slider);
-
 if (tg){
   tg.ready(); tg.expand();
-  try{ tg.setHeaderColor("#141416"); tg.setBackgroundColor("#141416"); }catch(e){}
-  tg.MainButton.setParams({text: init.ctx === "edit" ? "Применить к ролику" : "Сохранить и продолжить",
-                           color: "#f3f1ec", text_color: "#141416"});
-  tg.MainButton.onClick(save);
-  tg.MainButton.show();
+  try{ tg.setHeaderColor("#141110"); tg.setBackgroundColor("#141110"); tg.setBottomBarColor && tg.setBottomBarColor("#1d1917"); }catch(e){}
+  try{ tg.BackButton.onClick(() => { if (step > 0){ step--; wizard(); } else { subpage = ""; refresh(); } }); }catch(e){}
 }
-if (!tg || tg.platform === "unknown"){ const b = $("save"); b.style.display = "block"; b.onclick = save; }
+let wizDone = false; try{ wizDone = localStorage.getItem("reels_wizard_done") === "1"; }catch(e){}
+step = init.ctx === "new" && !wizDone ? 0 : -1;
+wizard();
 
-setInterval(() => {               // «проигрывание» превью
-  tick = (tick + 1) % (BLOCKS.length * 5);
-  renderSubs();
-}, 380);
+setInterval(() => { tick = (tick + 1) % (BLOCKS.length * 5); renderSubs(); }, 380);
 setInterval(() => {
-  const full = (hook.trim() || TITLE);
+  const full = (ownTitle && hook.trim()) || TITLE;
   typed = typed >= full.length + 14 ? 0 : typed + 1;
-  if (st.title_typing) render();
+  if (st.title_anim === "typing") render();
 }, 70);
-new ResizeObserver(render).observe(phone);
-render();
-setTimeout(playInsert, 600);
+new ResizeObserver(() => render()).observe(phone);
+setTimeout(playInsert, 800);
 </script>
 </body>
 </html>
