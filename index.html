@@ -58,6 +58,17 @@ header h1{margin:0;font-size:24px}
 .pl-box .line{display:inline;background:#000a;padding:.05em .25em;border-radius:.15em;-webkit-box-decoration-break:clone;box-decoration-break:clone;line-height:1.5}
 .phrasebg{display:inline-block;background:#0009;border-radius:.4em;padding:.35em .5em}
 .contrast .line{display:inline;background:#fff;color:#151515;padding:.05em .3em;border-radius:.12em;line-height:1.5}
+.gplate{display:inline-flex;align-items:center;gap:.5em;padding:.45em .9em .45em .55em;border-radius:.55em;text-align:center;
+  background:#dfe3e866;border:1px solid #ffffff70;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.gplate.dark{background:#2a2a2acc;border-color:#ffffff40;-webkit-backdrop-filter:none;backdrop-filter:none}
+.gplate i{flex:none;width:1.1em;height:1.1em;border-radius:50%;border:2px solid #fffc;display:grid;place-items:center}
+.gplate i::after{content:"";width:.35em;height:.35em;border-radius:50%;background:#fff}
+.gplate.dark i::after{content:"✓";width:auto;height:auto;background:none;color:#fff;font-size:.6em;font-style:normal}
+.phone.t-zoom{animation:t-zoom .45s ease}.phone.t-flash::after,.phone.t-fade::after{content:"";position:absolute;inset:0;z-index:6;animation:t-flash .45s ease}
+.phone.t-fade::after{background:#000}.phone.t-flash::after{background:#fff}
+.phone.t-blur .grade{animation:t-blur .45s ease}.phone.t-whip .grade{animation:t-whip .45s ease}
+@keyframes t-zoom{50%{transform:scale(1.12)}}@keyframes t-flash{0%,100%{opacity:0}45%{opacity:.85}}
+@keyframes t-blur{50%{filter:blur(6px)}}@keyframes t-whip{50%{filter:blur(4px);transform:translateX(18%)}}
 .emo{position:absolute;left:50%;transform:translate(-50%,-50%);font-size:12cqw;z-index:3;animation:emo 2.4s ease infinite}
 @keyframes emo{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}12%,80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0}}
 .ins{position:absolute;opacity:0;pointer-events:none;z-index:2}
@@ -219,11 +230,14 @@ const MOODS = {off:"Без музыки",any:"Любая",fun:"Весёлая",c
 const SOUNDS = {enhance:"Улучшить",original:"Как в исходнике",denoise:"Убрать шум",mute:"Без звука"};
 const SFX = {none:"без звуков",moderate:"умеренно",dense:"плотно"};
 const EMOJI = {off:"выключено",rarest:"редчайшие",rare:"редко",moderate:"умеренно"};
+const TRANS = {none:"Склейка",zoom:"Зум",flash:"Вспышка",blur:"Размытие",whip:"Свайп",fade:"Затемнение"};
+const APPEAR = {pop:"поп",whoosh:"свуш",click:"клик",soft:"мягкий",chime:"звон",none:"без звука"};
 const TANIM = {typing:"Печатается",fade:"Плавно",pop:"Выпрыгивает",none:"Сразу"};
 const ANIMS = {pop:"Выпрыгивание",slide:"Выезд сбоку",rise:"Всплытие",zoom:"Приближение",float:"Парение",spin:"С поворотом",polaroid:"Полароид",fade:"Плавно"};
 const POS = {top:"Сверху",center:"По центру",bottom:"Снизу",left:"Слева",right:"Справа",half:"Половина экрана",full:"Весь экран"};
 const DEF = {sub_mode:"dynamic",sub_look:"milk",accent:"#FFF0B8",accent_font:"auto",sub_font:"Montserrat",sub_scale:1,sub_y:.74,sub_pos:"auto",
-  plate:"shadow",phrase_bg:false,emoji:"off",censor_strong:false,cards:true,
+  plate:"shadow",phrase_bg:false,emoji:"off",censor_strong:false,cards:true,plate_look:"glass",key_plates:true,
+  appear_sound:"pop",transition:"zoom",transition_cuts:false,
   title:true,title_case:"lower",title_font:"Montserrat",title_color:"accent",title_fill:false,title_anim:"typing",title_typing:true,
   title_y:.17,title_scale:1,title_hold:6,insert_anim:"pop",insert_pos:"top",brightness:0,contrast:1.04,warmth:.015,saturation:1.05,
   bw:false,filter:"none",filter_strength:1,retouch:false,dense:true,density:8,zooms:true,sfx:true,sfx_level:"moderate",sfx_volume:70,
@@ -272,7 +286,17 @@ function applyFilter(layer, key){
   if (t){ if (F.tint){ t.style.background = F.tint[0]; t.style.mixBlendMode = F.tint[1]; t.style.opacity = F.tint[2]; } else t.style.opacity = 0; }
   if (v) v.style.opacity = F.vig || 0;
 }
-function subY(){ return st.sub_pos === "top" ? .30 : st.sub_y; }
+function subY(){
+  if (st.sub_pos === "top") return .30;
+  if (st.sub_pos === "auto"){ const bi = Math.floor(tick / 5) % BLOCKS.length; return [st.sub_y, .60, st.title ? .60 : .24][bi]; }
+  return st.sub_y;
+}
+function playTransition(){
+  const ph = $("phone"); ["t-zoom","t-flash","t-fade","t-blur","t-whip"].forEach(c => ph.classList.remove(c));
+  if (st.transition === "none") return;
+  void ph.offsetWidth; ph.classList.add("t-" + st.transition);
+  setTimeout(() => ph.classList.remove("t-" + st.transition), 500);
+}
 
 function render(){
   const k = K();
@@ -338,6 +362,11 @@ function renderSubs(){
       return w(i);
     }).join(" ");
     html = `<span class="line" style="font-weight:700;font-size:${62*sc*k}px">${parts}</span>`;
+  }
+  const plateNow = m === "dynamic" && st.cards && st.key_plates && Math.floor(tick / 5) % BLOCKS.length === 2;
+  if (plateNow){
+    box.innerHTML = `<span class="gplate ${st.plate_look === "dark" ? "dark" : ""}" style="font-size:${46*sc*k}px"><i></i><span>${html}</span></span>`;
+    return;
   }
   box.innerHTML = st.phrase_bg && m !== "contrast" ? `<span class="phrasebg">${html}</span>` : html;
 }
@@ -597,11 +626,17 @@ const PANELS = {
       p.appendChild(chips(SOUNDS, () => sound, v => sound = v));
       if (sound !== "mute") p.appendChild(slider("", -9, 9, 1, () => st.volume_db, v => st.volume_db = v, null, ["тише", "как обычно", "громче"]));
       p.appendChild(row("Звуки в монтаже", seg(SFX, () => st.sfx ? st.sfx_level : "none", v => { st.sfx_level = v; st.sfx = v !== "none"; })));
-      if (st.sfx && st.sfx_level !== "none")
+      if (st.sfx && st.sfx_level !== "none"){
         p.appendChild(slider("Громкость звуковых эффектов", 0, 100, 5, () => st.sfx_volume, v => st.sfx_volume = v, v => Math.round(v) + " %"));
+        p.appendChild(row("Звук плашек и надписей", chips(APPEAR, () => st.appear_sound, v => st.appear_sound = v)));
+      }
     }
     if (soundSeg === "tempo"){
       p.appendChild(tempoBlock());
+      p.appendChild(h(`<hr>`));
+      p.appendChild(row("Переходы между видео и вставками", chips(TRANS, () => st.transition, v => { st.transition = v; setTimeout(playTransition, 30); })));
+      if (st.transition !== "none")
+        p.appendChild(toggle("Переход на каждой склейке", () => st.transition_cuts, v => st.transition_cuts = v, "и там, где вырезаны паузы"));
       p.appendChild(h(`<hr>`));
       p.appendChild(toggle("Наезды камеры", () => st.zooms, v => st.zooms = v, "на сильных фразах"));
       p.appendChild(row("Как появляются фото и гифки", chips(ANIMS, () => st.insert_anim, v => { st.insert_anim = v; setTimeout(playInsert, 30); })));
@@ -616,12 +651,17 @@ function moreSubs(p){
   p.appendChild(toggle("Субтитры в ролике", () => st.sub_mode !== "none", v => { st.sub_mode = v ? (st._prev_mode || "dynamic") : (st._prev_mode = st.sub_mode, "none"); }));
   p.appendChild(toggle("Усиленная цензура", () => st.censor_strong, v => st.censor_strong = v, "мат — звёздочками и «пиком»"));
   p.appendChild(row("Положение субтитров", seg({auto: "Авто", bottom: "Снизу", top: "Сверху"}, () => st.sub_pos, v => st.sub_pos = v)));
+  if (st.sub_pos === "auto") p.appendChild(h(`<div class="sub">«Авто» — в основном снизу, иногда по центру и сверху, чтобы ролик выглядел живее.</div>`));
   if (st.sub_pos !== "top") p.appendChild(slider("Высота субтитров", .3, .9, .01, () => st.sub_y, v => st.sub_y = v, v => Math.round(v * 100) + "%"));
   p.appendChild(row("Смайлики в субтитрах", chips(EMOJI, () => st.emoji, v => st.emoji = v)));
   p.appendChild(row("✨ Шрифт субтитров", fontChips(false, () => st.sub_font, v => st.sub_font = v)));
   p.appendChild(row("Подложка под буквами", seg({shadow: "Тень", box: "Заливка", none: "Ничего"}, () => st.plate, v => st.plate = v)));
   p.appendChild(toggle("Фон под каждой фразой", () => st.phrase_bg, v => st.phrase_bg = v));
   p.appendChild(toggle("Карточки-тезисы", () => st.cards, v => st.cards = v, "плашки на «во-первых, во-вторых…»"));
+  if (st.cards){
+    p.appendChild(row("Вид плашек", seg({glass: "Стеклянные", dark: "Тёмные"}, () => st.plate_look, v => st.plate_look = v)));
+    p.appendChild(toggle("Плашки на ключевых фразах", () => st.key_plates, v => st.key_plates = v, "главная мысль — крупно на плашке, примерно раз в 10 секунд"));
+  }
   p.appendChild(row("Цвет подсветки", accentDots()));
 }
 
